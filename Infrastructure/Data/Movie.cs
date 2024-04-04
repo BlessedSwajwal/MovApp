@@ -6,18 +6,21 @@ public sealed class Movie
     public string Description { get; set; }
     public int Rating { get; set; }
     public int TotalRates { get; set; }
+    public byte[] Image { get; set; }
 
     private List<Guid> _commentIds = new();
     public IReadOnlyList<Guid> CommentIds => _commentIds.AsReadOnly();
 
-    public Movie(string name, string description)
+    public Movie(string name, string description, byte[] image)
     {
         Id = Guid.NewGuid();
         Name = name;
         Description = description;
+        Image = image;
         Rating = 0;
         TotalRates = 0;
         Console.WriteLine(Id);
+
     }
 
 #pragma warning disable CS8618

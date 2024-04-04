@@ -3,10 +3,11 @@ using Infrastructure.DTOs;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.JSInterop;
 
 namespace MovApp.Controllers;
 [AllowAnonymous]
-public class UserAuthenticationController(IUserAuthenticationService _authService) : Controller
+public class UserAuthenticationController(IUserAuthenticationService _authService, IJSRuntime jSRuntime) : Controller
 {
     public IActionResult Index()
     {
@@ -26,18 +27,23 @@ public class UserAuthenticationController(IUserAuthenticationService _authServic
     [HttpPost]
     public async Task<IActionResult> Login(LoginModel model)
     {
+
         if (!ModelState.IsValid)
             return View(model);
         var result = await _authService.LoginAsync(model, UserRoles.user);
-        if (result.StatusCode == 1)
-        {
-            return RedirectToAction(nameof(HomeController.Index));
-        }
-        else
-        {
-            TempData["msg"] = result.Message;
-            return RedirectToAction(nameof(Login));
-        }
+
+        return result.Match<IActionResult>(
+                authResponse =>
+                {
+                    ViewBag.Token = authResponse.token;
+                    return View();
+                },
+                errorResponse =>
+                {
+                    TempData["msg"] = $"{errorResponse.StatusCode}: {errorResponse.Message}";
+                    return RedirectToAction(nameof(Login));
+                }
+            );
     }
 
     [HttpPost]

@@ -22,6 +22,6 @@ public class RegistrationModel
     public string PasswordConfirm { get; set; }
     public string? Role { get; set; }
 
-    public string UserType { get; set; }
+    public string? UserType { get; set; }
 }
 

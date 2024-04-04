@@ -1,34 +1,32 @@
 ﻿using Infrastructure.Authentication.Interfaces;
+using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.DTOs;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using OneOf;
+using System.Net;
 
 namespace Infrastructure.Services.Implementation;
 public class UserAuthenticationService : IUserAuthenticationService
 {
     private readonly UserManager<ApplicationUser> userManager;
-    private readonly RoleManager<IdentityRole> roleManager;
+    private readonly SignInManager<ApplicationUser> signInManager;
     private readonly IJwtGenerator _jwtGenerator;
-    //private readonly SignInManager<ApplicationUser> signInManager;
 
-    public UserAuthenticationService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager /*, SignInManager<ApplicationUser> signInManager*/, IJwtGenerator jwtGenerator)
+    public UserAuthenticationService(UserManager<ApplicationUser> userManager, IJwtGenerator jwtGenerator, SignInManager<ApplicationUser> signInManager)
     {
         this.userManager = userManager;
-        this.roleManager = roleManager;
         _jwtGenerator = jwtGenerator;
-        //this.signInManager = signInManager;
+        this.signInManager = signInManager;
     }
 
-    public async Task<Status> LoginAsync(LoginModel model, string role)
+    public async Task<OneOf<AuthResponse, CustomError>> LoginAsync(LoginModel model, string role)
     {
-        var status = new Status();
         var user = await userManager.FindByNameAsync(model.Username);
         if (user == null)
         {
-            status.StatusCode = 0;
-            status.Message = "Invalid username";
-            return status;
+            var error = new CustomError((int)HttpStatusCode.NotFound, "No such user found");
         }
 
         //if (!await userManager.CheckPasswordAsync(user, model.Password))
@@ -57,22 +55,20 @@ public class UserAuthenticationService : IUserAuthenticationService
             //    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
             //}
 
-            status.StatusCode = 1;
-            status.Message = "Logged in successfully";
+            return new AuthResponse(token);
         }
 
         else
         {
-            status.StatusCode = 0;
-            status.Message = "Error on logging in";
+            return new CustomError(500, "Error while logging in");
         }
 
-        return status;
     }
 
 
     public Task LogoutAsync()
     {
+
         throw new NotImplementedException();
     }
 
@@ -94,6 +90,7 @@ public class UserAuthenticationService : IUserAuthenticationService
             UserName = model.Username,
             FirstName = model.FirstName,
             LastName = model.LastName,
+            UserType = model.UserType!,
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
         };
@@ -105,14 +102,7 @@ public class UserAuthenticationService : IUserAuthenticationService
             return status;
         }
 
-        if (!await roleManager.RoleExistsAsync(model.Role))
-            await roleManager.CreateAsync(new IdentityRole(model.Role));
 
-
-        if (await roleManager.RoleExistsAsync(model.Role))
-        {
-            await userManager.AddToRoleAsync(user, model.Role);
-        }
 
         status.StatusCode = 1;
         status.Message = "You have registered successfully";

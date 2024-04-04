@@ -3,6 +3,8 @@ using Infrastructure.Authentication.Implementation;
 using Infrastructure.Authentication.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Persistence;
+using Infrastructure.Repositories.Implementation;
+using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,12 +23,12 @@ public static class DependencyRegister
     {
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("MovApp")));
 
+        AddAuth(services, configuration);
+        AddServicesAndRepo(services);
+
         services.AddIdentityCore<ApplicationUser>()
              .AddRoles<IdentityRole>()
              .AddEntityFrameworkStores<ApplicationDbContext>();
-
-        AddAuth(services, configuration);
-        AddServices(services);
 
         return services;
     }
@@ -53,8 +55,11 @@ public static class DependencyRegister
         services.AddSingleton<IJwtGenerator, JwtGenerator>();
     }
 
-    public static void AddServices(IServiceCollection services)
+    public static void AddServicesAndRepo(IServiceCollection services)
     {
+        services.AddScoped<IMovieRepository, MovieRepository>();
+
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
+        services.AddScoped<IMovieService, MovieService>();
     }
 }

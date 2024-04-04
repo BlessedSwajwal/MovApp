@@ -3,6 +3,11 @@
 @{
     Layout = null;
 }
+
+@section Scripts {
+    
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,6 +60,23 @@
 
 </head>
 <body>
+    <script>
+        // Get the token from ViewBag
+        var token = '@ViewBag.Token';
+        console.log("In script");
+        console.log(token);
+        // Check if token exists and store it in local storage
+        if (token) {
+            localStorage.setItem('jwtToken', token);
+        }
+    </script>
+    <script>
+        var isSet = localStorage.getItem('jwtToken');
+        console.log('MySaved: ' + isSet);
+        if (isSet) {
+            window.location.href = '@Url.Action("Registration", "UserAuthentication")';
+        }
+    </script>
 
     <form asp-action="Login" method="post">
 
