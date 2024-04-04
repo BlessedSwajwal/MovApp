@@ -1,6 +1,10 @@
 ﻿using Infrastructure.Authentication;
+using Infrastructure.Authentication.Implementation;
+using Infrastructure.Authentication.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Persistence;
+using Infrastructure.Services.Implementation;
+using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +26,7 @@ public static class DependencyRegister
              .AddEntityFrameworkStores<ApplicationDbContext>();
 
         AddAuth(services, configuration);
+        AddServices(services);
 
         return services;
     }
@@ -44,5 +49,12 @@ public static class DependencyRegister
                 ValidAudience = jwtSettings.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
             });
+
+        services.AddSingleton<IJwtGenerator, JwtGenerator>();
+    }
+
+    public static void AddServices(IServiceCollection services)
+    {
+        services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
     }
 }
