@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Authentication;
 using Infrastructure.Authentication.Implementation;
 using Infrastructure.Authentication.Interfaces;
+using Infrastructure.Authorization;
 using Infrastructure.Data;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories.Implementation;
@@ -8,6 +9,7 @@ using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +31,17 @@ public static class DependencyRegister
         services.AddIdentity<ApplicationUser, IdentityRole>()
              .AddEntityFrameworkStores<ApplicationDbContext>();
 
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminRequirement", policy =>
+            {
+                policy.Requirements.Add(new AdminEmailRequirement());
+            });
+        });
+
+        services.AddSingleton<IAuthorizationHandler, AdminEmailRequirementHandler>();
+
+        AddAdmin.Add(configuration.GetValue<string>("AdminPassword")!);
         return services;
     }
 
@@ -71,4 +84,6 @@ public static class DependencyRegister
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
         services.AddScoped<IMovieService, MovieService>();
     }
+
+
 }

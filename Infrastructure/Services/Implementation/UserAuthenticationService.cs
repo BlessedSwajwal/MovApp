@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using OneOf;
 using System.Net;
 
+
 namespace Infrastructure.Services.Implementation;
 public class UserAuthenticationService : IUserAuthenticationService
 {
@@ -18,6 +19,7 @@ public class UserAuthenticationService : IUserAuthenticationService
     {
         this.userManager = userManager;
         _jwtGenerator = jwtGenerator;
+
         this.signInManager = signInManager;
     }
 
@@ -37,7 +39,6 @@ public class UserAuthenticationService : IUserAuthenticationService
             var token = _jwtGenerator.GenerateJwt(user, role);
             await Console.Out.WriteLineAsync(token);
 
-
             return new AuthResponse(token);
         }
         else
@@ -52,6 +53,12 @@ public class UserAuthenticationService : IUserAuthenticationService
     {
 
         throw new NotImplementedException();
+    }
+
+    public async Task<ApplicationUser> GetAdmin()
+    {
+        var admin = await userManager.FindByEmailAsync("admin@admin.com");
+        return admin;
     }
 
     public async Task<Status> RegisterAsync(RegistrationModel model)

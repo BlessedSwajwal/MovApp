@@ -1,0 +1,93 @@
+﻿@using Infrastructure.DTOs.Movie
+@model IReadOnlyList<MovieListDTO>;
+
+@{
+    ViewData["Title"] = "Movies";
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movies List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        img {
+            max-width: 100px;
+            height: auto;
+        }
+
+        .button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movies List</h1>
+    
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Rating</th>
+            <th>Total Rates</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
+        
+        @foreach (var movie in Model)
+        {
+            <tr>
+                <td>@movie.Name</td>
+                <td>@movie.Description</td>
+                <td>@movie.Rating</td>
+                <td>@movie.TotalRates</td>
+                <td><img src="data:image;base64,@Convert.ToBase64String(movie.Image)" /></td>
+                <td><a class="button" href="@Url.Action("Detail", "Movies", new { id = movie.Id })">Details</a></td>
+            </tr>
+        }
+    </table>
+</body>
+</html>
+

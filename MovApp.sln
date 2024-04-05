@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovApp", "MovApp\MovApp.csproj", "{82EE6CE9-1B5D-4FF8-BE9D-FD452CBBFA23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovApp", "MovApp\MovApp.csproj", "{82EE6CE9-1B5D-4FF8-BE9D-FD452CBBFA23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{27A9999D-4FB0-47D1-93AE-B90B463B9794}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{27A9999D-4FB0-47D1-93AE-B90B463B9794}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

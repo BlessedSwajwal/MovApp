@@ -1,6 +1,7 @@
 ﻿namespace Infrastructure.Data;
 public sealed class Movie
 {
+    public static readonly Movie Empty = new Movie();
     public Guid Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }

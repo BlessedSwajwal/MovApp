@@ -36,8 +36,8 @@ public class UserAuthenticationController(IUserAuthenticationService _authServic
         return result.Match<IActionResult>(
                 authResponse =>
                 {
-                    //ViewBag.Token = authResponse.token;
-                    return RedirectToAction(nameof(MoviesController.Index), "Movies");
+                    ViewBag.Token = authResponse.token;
+                    return (RedirectToAction(nameof(MoviesController.Index), "Movies"));
                 },
                 errorResponse =>
                 {

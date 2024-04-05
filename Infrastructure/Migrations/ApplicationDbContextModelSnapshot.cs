@@ -97,6 +97,24 @@ namespace Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "3b569d86-662d-451e-a03e-4b6d2eb9a828",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "5b0d75d3-8488-4313-af03-dda0101812a6",
+                            Email = "admin@admin.com",
+                            EmailConfirmed = true,
+                            FirstName = "Admin",
+                            LastName = "Admin",
+                            LockoutEnabled = false,
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "8765a749-bba1-410c-8040-267cc0121649",
+                            TwoFactorEnabled = false,
+                            UserName = "Admin",
+                            UserType = "ADMIN"
+                        });
                 });
 
             modelBuilder.Entity("Infrastructure.Data.Comment", b =>

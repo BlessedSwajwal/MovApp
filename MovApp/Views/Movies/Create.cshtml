@@ -5,7 +5,7 @@
     ViewData["Title"] = "Create Movie";
 }
 
-@using (Html.BeginForm("Create", "Movie", FormMethod.Post, new { enctype = "multipart/form-data" }))
+@using (Html.BeginForm("Create", "Movies", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     <div class="form-group">
         @Html.LabelFor(m => m.Title)
@@ -22,5 +22,17 @@
         <input type="file" name="imageFile" id="imageFile" class="form-control" />
     </div>
 
+    @if (TempData["msg"] != null && ((List<string>) TempData["msg"]).Any())
+    {
+        foreach (string error in (List<string>)TempData["msg"])
+        {
+            <div class="form-group">
+                <span class="text-info">@error</span>
+            </div>
+        }
+    }
+
     <button type="submit" class="btn btn-primary">Create Movie</button>
+
+
 }
