@@ -37,4 +37,9 @@ public class MovieService(IMovieRepository movieRepository) : IMovieService
         movieRepository.AddComment(comment);
         //await movieRepository.SaveAsync();
     }
+
+    public void DeleteMovie(Guid movieId)
+    {
+        movieRepository.DeleteMovie(movieId);
+    }
 }

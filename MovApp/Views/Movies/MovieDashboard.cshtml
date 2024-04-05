@@ -1,5 +1,4 @@
 ﻿@using Infrastructure.DTOs.Movie
-@using System.Security.Claims
 @model IReadOnlyList<MovieListDTO>;
 
 @{
@@ -66,7 +65,7 @@
 </head>
 <body>
     <h1>Movies List</h1>
-    
+
     <table>
         <tr>
             <th>Name</th>
@@ -76,7 +75,7 @@
             <th>Image</th>
             <th>Actions</th>
         </tr>
-        
+
         @foreach (var movie in Model)
         {
             <tr>
@@ -87,13 +86,8 @@
                 <td><img src="data:image;base64,@Convert.ToBase64String(movie.Image)" /></td>
                 <td>
                     <a class="button" href="@Url.Action("Detail", "Movies", new { id = movie.Id })">Details</a>
-                    @if (User.FindFirst(ClaimTypes.Email)!.Value.Equals("admin@admin.com", StringComparison.OrdinalIgnoreCase))
-                    {
-                        <a class="button" href="@Url.Action($"Delete", "Movies", new { id = movie.Id })">Delete</a>
-                        <br />
-                    }
-                </td>
-                
+                    <a class="button" href="@Url.Action($"Delete", "Movies", new { id = movie.Id })">Delete</a>
+                    </td>
             </tr>
         }
     </table>

@@ -31,7 +31,7 @@ public class UserAuthenticationController(IUserAuthenticationService _authServic
 
         if (!ModelState.IsValid)
             return View(model);
-        var result = await _authService.LoginAsync(model, UserRoles.user);
+        var result = await _authService.LoginAsync(model);
 
         return result.Match<IActionResult>(
                 authResponse =>

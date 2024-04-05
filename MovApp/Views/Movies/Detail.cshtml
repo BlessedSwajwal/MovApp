@@ -1,9 +1,10 @@
 ﻿@using Infrastructure.DTOs.Movie
 @using Infrastructure.Data
 @using System.Security.Claims
-@model MovieDetailDTO
+@model MovieDetailViewModel
 @{
-    ViewData["Title"] = Model.Name;
+    ViewData["Title"] = Model.movieDetailDTO.Name;
+    var movie = Model.movieDetailDTO;
 }
 
 <!DOCTYPE html>
@@ -28,15 +29,29 @@
             /* Add styles for other movie details (Title, Description, Rating, etc.) */
             margin-top: 20px;
         }
+
+        .button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
     <div class="movie-details">
-        <img class="movie-image" src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Image)" alt="Movie Poster">
+        <img class="movie-image" src="data:image/jpeg;base64,@Convert.ToBase64String(movie.Image)" alt="Movie Poster">
         <div class="movie-info">
-            <h1>@Model.Name</h1>
-            <p>@Model.Description</p>
-            <p>Rating: @Model.Rating</p>
+            <h1>@movie.Name</h1>
+            <p>@movie.Description</p>
+            <p>Rating: @movie.Rating</p>
             <!-- Other movie details (TotalRates, Comments, etc.) go here -->
         </div>
         @using (Html.BeginForm("SubmitComment", "Movies", FormMethod.Post))
@@ -44,12 +59,23 @@
             <h5>Your comment: </h5>
             <textarea type="text" id="comment" name="comment" rows="4" cols="50"></textarea>
             <br />
-            <input type="text" id="movieId" name="movieId" hidden value="@Model.Id" />
+            <input type="text" id="movieId" name="movieId" hidden value="@movie.Id" />
             <button type="submit">Submit</button>
         }
 
+        @{
+            var email = @Model.User.FindFirstValue(ClaimTypes.Email)!;
+        }
 
-        @foreach (var comment in Model.Comments)
+        @if(email.Equals("admin@admin.com", StringComparison.OrdinalIgnoreCase))
+        {
+            <a class="button" href="@Url.Action($"Delete", "Movies", new { id = movie.Id })">Delete</a>
+            <br/>
+        }
+
+        
+
+        @foreach (var comment in movie.Comments)
         {
             <strong>@comment.CommenterName:</strong> @comment.Description
             <br />

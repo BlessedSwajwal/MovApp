@@ -7,7 +7,7 @@ namespace Infrastructure.Services.Interfaces;
 public interface IUserAuthenticationService
 {
     Task<ApplicationUser> GetAdmin();
-    Task<OneOf<AuthResponse, CustomError>> LoginAsync(LoginModel model, string role);
+    Task<OneOf<AuthResponse, CustomError>> LoginAsync(LoginModel model);
     Task LogoutAsync();
     Task<Status> RegisterAsync(RegistrationModel model);
     //Task<Status> ChangePasswordAsync(ChangePasswordModel model, string username);

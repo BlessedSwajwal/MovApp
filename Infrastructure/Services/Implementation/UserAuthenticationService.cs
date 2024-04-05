@@ -6,6 +6,7 @@ using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using OneOf;
 using System.Net;
+using System.Security.Claims;
 
 
 namespace Infrastructure.Services.Implementation;
@@ -23,27 +24,30 @@ public class UserAuthenticationService : IUserAuthenticationService
         this.signInManager = signInManager;
     }
 
-    public async Task<OneOf<AuthResponse, CustomError>> LoginAsync(LoginModel model, string role)
+    public async Task<OneOf<AuthResponse, CustomError>> LoginAsync(LoginModel model)
     {
         var user = await userManager.FindByNameAsync(model.Username);
 
-        if (user == null)
+        if (user is null)
         {
             var error = new CustomError((int)HttpStatusCode.NotFound, "No such user found");
+            return error;
         }
-        var passwordCorrect = await userManager.CheckPasswordAsync(user, model.Password);
+        var passwordCorrect = await userManager.CheckPasswordAsync(user!, model.Password);
 
         if (passwordCorrect)
         {
-            var signInResult = await signInManager.PasswordSignInAsync(user, model.Password, false, true);
-            var token = _jwtGenerator.GenerateJwt(user, role);
+            Claim[] claims = [new Claim(ClaimTypes.Role, user.UserType)];
+            await signInManager.SignInWithClaimsAsync(user, false, claims);
+            //var signInResult = await signInManager.PasswordSignInAsync(user, model.Password, false, true);
+            var token = _jwtGenerator.GenerateJwt(user, user.UserType);
             await Console.Out.WriteLineAsync(token);
 
             return new AuthResponse(token);
         }
         else
         {
-            return new CustomError(404, "No user found");
+            return new CustomError(404, "Invalid credentials");
         }
 
     }
@@ -90,8 +94,6 @@ public class UserAuthenticationService : IUserAuthenticationService
             status.Message = "User creation failed";
             return status;
         }
-
-
 
         status.StatusCode = 1;
         status.Message = "You have registered successfully";

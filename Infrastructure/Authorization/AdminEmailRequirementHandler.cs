@@ -7,8 +7,7 @@ public class AdminEmailRequirementHandler : AuthorizationHandler<AdminEmailRequi
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, AdminEmailRequirement requirement)
     {
-        if (context.User.HasClaim(c => c.Type == ClaimTypes.Email && c.Value == "admin@admin.com") ||
-            context.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == UserRoles.admin))
+        if (context.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == UserRoles.admin))
         {
             context.Succeed(requirement);
         }

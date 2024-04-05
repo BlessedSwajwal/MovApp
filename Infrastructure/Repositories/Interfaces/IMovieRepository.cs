@@ -5,6 +5,7 @@ public interface IMovieRepository
 {
     void AddComment(Comment comment);
     public void Create(Movie movie);
+    void DeleteMovie(Guid movieId);
     public Task<IReadOnlyList<Movie>> GetAllAsync();
 
     public Task<IReadOnlyList<Comment>> GetCommentsForAMovie(Guid movieId);

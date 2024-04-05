@@ -47,4 +47,10 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         dbContext.Comments.Add(comment);
         dbContext.SaveChanges();
     }
+
+    public void DeleteMovie(Guid movieId)
+    {
+        dbContext.Movies.Remove(GetMovieDetail(movieId));
+        dbContext.SaveChanges();
+    }
 }

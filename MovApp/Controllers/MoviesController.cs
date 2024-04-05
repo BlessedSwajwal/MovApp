@@ -2,6 +2,7 @@
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MovApp.Models;
 using System.Security.Claims;
 
 namespace MovApp.Controllers;
@@ -14,9 +15,24 @@ public class MoviesController(IMovieService movieService) : Controller
     }
 
     [Authorize(Policy = "AdminRequirement")]
+    public async Task<IActionResult> MovieDashboard()
+    {
+        var movies = await movieService.GetAllMovieAsync();
+        return View(movies);
+    }
+
+    [Authorize(Policy = "AdminRequirement")]
     public IActionResult Create()
     {
+        var user = User;
         return View();
+    }
+
+    [Authorize(Policy = "AdminRequirement")]
+    public IActionResult Delete(Guid id)
+    {
+        movieService.DeleteMovie(id);
+        return RedirectToAction(nameof(MovieDashboard));
     }
 
     [HttpPost]
@@ -36,7 +52,7 @@ public class MoviesController(IMovieService movieService) : Controller
             //TODO: Create the movie
             await movieService.CreateMovieAsync(model);
 
-            return RedirectToAction("Index", "Movies"); // Redirect to home or another action
+            return RedirectToAction(nameof(MovieDashboard)); // Redirect to home or another action
         }
         else
         {
@@ -52,7 +68,7 @@ public class MoviesController(IMovieService movieService) : Controller
 
     public async Task<IActionResult> Detail(Guid id)
     {
-        var movie = await movieService.GetMovieDetail(id);
+        var movie = new MovieDetailViewModel(User, await movieService.GetMovieDetail(id));
         return View(movie);
     }
 
