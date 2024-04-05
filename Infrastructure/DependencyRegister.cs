@@ -7,7 +7,7 @@ using Infrastructure.Repositories.Implementation;
 using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,8 +26,7 @@ public static class DependencyRegister
         AddAuth(services, configuration);
         AddServicesAndRepo(services);
 
-        services.AddIdentityCore<ApplicationUser>()
-             .AddRoles<IdentityRole>()
+        services.AddIdentity<ApplicationUser, IdentityRole>()
              .AddEntityFrameworkStores<ApplicationDbContext>();
 
         return services;
@@ -40,7 +39,17 @@ public static class DependencyRegister
         services.AddSingleton(Options.Create<JwtSettings>(jwtSettings));
 
         //Add Authentication
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        })
+            .AddCookie(options =>
+            {
+                options.LoginPath = "/UserAuthentication/Login";
+
+            })
             .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters()
             {
                 ValidateIssuer = true,

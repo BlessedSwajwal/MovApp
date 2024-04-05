@@ -3,17 +3,18 @@ using Infrastructure.DTOs;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.JSInterop;
 
 namespace MovApp.Controllers;
 [AllowAnonymous]
-public class UserAuthenticationController(IUserAuthenticationService _authService, IJSRuntime jSRuntime) : Controller
+public class UserAuthenticationController(IUserAuthenticationService _authService) : Controller
 {
     public IActionResult Index()
     {
         return View();
     }
 
+    [Route("/Account/Login")]
+    [Route("/UserAuthentication/Login")]
     public IActionResult Login()
     {
         return View();
@@ -24,7 +25,7 @@ public class UserAuthenticationController(IUserAuthenticationService _authServic
         return View();
     }
 
-    [HttpPost]
+    [HttpPost("/Account/Login")]
     public async Task<IActionResult> Login(LoginModel model)
     {
 
@@ -35,8 +36,8 @@ public class UserAuthenticationController(IUserAuthenticationService _authServic
         return result.Match<IActionResult>(
                 authResponse =>
                 {
-                    ViewBag.Token = authResponse.token;
-                    return View();
+                    //ViewBag.Token = authResponse.token;
+                    return RedirectToAction(nameof(MoviesController.Index), "Movies");
                 },
                 errorResponse =>
                 {

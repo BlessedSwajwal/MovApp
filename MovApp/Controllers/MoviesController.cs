@@ -1,10 +1,8 @@
 ﻿using Infrastructure.DTOs.Movie;
 using Infrastructure.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MovApp.Controllers;
-[AllowAnonymous]
 public class MoviesController(IMovieService movieService) : Controller
 {
     public IActionResult Index()

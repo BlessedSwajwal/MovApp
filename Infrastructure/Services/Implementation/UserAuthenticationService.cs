@@ -24,43 +24,25 @@ public class UserAuthenticationService : IUserAuthenticationService
     public async Task<OneOf<AuthResponse, CustomError>> LoginAsync(LoginModel model, string role)
     {
         var user = await userManager.FindByNameAsync(model.Username);
+
         if (user == null)
         {
             var error = new CustomError((int)HttpStatusCode.NotFound, "No such user found");
         }
-
-        //if (!await userManager.CheckPasswordAsync(user, model.Password))
-        //{
-        //    status.StatusCode = 0;
-        //    status.Message = "Invalid Password";
-        //    return status;
-        //}
         var passwordCorrect = await userManager.CheckPasswordAsync(user, model.Password);
 
-
-        //var signInResult = await signInManager.PasswordSignInAsync(user, model.Password, false, true);
         if (passwordCorrect)
         {
+            var signInResult = await signInManager.PasswordSignInAsync(user, model.Password, false, true);
             var token = _jwtGenerator.GenerateJwt(user, role);
             await Console.Out.WriteLineAsync(token);
-            //var userRoles = await userManager.GetRolesAsync(user);
 
-            //var authClaims = new List<Claim>
-            //    {
-            //        new Claim(ClaimTypes.Name, user.UserName),
-            //    };
-
-            //foreach (var userRole in userRoles)
-            //{
-            //    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-            //}
 
             return new AuthResponse(token);
         }
-
         else
         {
-            return new CustomError(500, "Error while logging in");
+            return new CustomError(404, "No user found");
         }
 
     }
