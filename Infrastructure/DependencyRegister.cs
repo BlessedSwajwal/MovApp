@@ -25,23 +25,22 @@ public static class DependencyRegister
     {
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("MovApp")));
 
+
         AddAuth(services, configuration);
         AddServicesAndRepo(services);
 
         services.AddIdentity<ApplicationUser, IdentityRole>()
              .AddEntityFrameworkStores<ApplicationDbContext>();
 
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("AdminRequirement", policy =>
-            {
-                policy.Requirements.Add(new AdminEmailRequirement());
-            });
-        });
+        //AddAdmin.Add(configuration.GetValue<string>("AdminPassword")!);
 
-        services.AddSingleton<IAuthorizationHandler, AdminEmailRequirementHandler>();
 
-        AddAdmin.Add(configuration.GetValue<string>("AdminPassword")!);
+
+        //Movie settings
+        var tmdbSettings = new TmdbSettings();
+        configuration.GetSection(TmdbSettings.SectionName).Bind(tmdbSettings);
+        services.AddSingleton(Options.Create<TmdbSettings>(tmdbSettings));
+
         return services;
     }
 
@@ -75,14 +74,28 @@ public static class DependencyRegister
             });
 
         services.AddSingleton<IJwtGenerator, JwtGenerator>();
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminRequirement", policy =>
+            {
+                policy.Requirements.Add(new AdminEmailRequirement());
+            });
+        });
+
+        services.AddSingleton<IAuthorizationHandler, AdminEmailRequirementHandler>();
     }
 
     public static void AddServicesAndRepo(IServiceCollection services)
     {
+        services.AddHttpClient<IMovieService, MovieService>(op =>
+        {
+            op.BaseAddress = new Uri("https://api.themoviedb.org");
+        });
         services.AddScoped<IMovieRepository, MovieRepository>();
 
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
-        services.AddScoped<IMovieService, MovieService>();
+        //services.AddScoped<IMovieService, MovieService>();
     }
 
 

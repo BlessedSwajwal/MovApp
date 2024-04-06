@@ -84,4 +84,10 @@ public class MoviesController(IMovieService movieService) : Controller
 
         return RedirectToAction(nameof(Detail), new { id = movieId });
     }
+
+    public async Task<IActionResult> Trending([FromQuery] int page = 1)
+    {
+        var movies = await movieService.GetTrendingMovies(page);
+        return View(movies);
+    }
 }
