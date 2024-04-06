@@ -1,7 +1,8 @@
-﻿@using Infrastructure.DTOs.Movie
+﻿
 @using System.Security.Claims
 @using Infrastructure.Data
-@model IReadOnlyList<CreateMovieDTO>;
+@using Infrastructure.Services
+@model IReadOnlyList<TrendingMovieDTO>;
 
 @{
     ViewData["Title"] = "Movies";
@@ -70,7 +71,7 @@
     <h1>Movies List</h1>
     @if (User.FindFirstValue(ClaimTypes.Role)!.Equals(UserRoles.admin, StringComparison.OrdinalIgnoreCase))
     {
-        <a class="button" href="@Url.Action($"Create", "Movies")">Add new</a>
+        <a class="button" href="@Url.Action($"Create", "Movies")">Add all to database</a>
         <br />
     }
 
@@ -80,9 +81,11 @@
             {
                 
                     <div>
-                        <img src="data:image;base64,@Convert.ToBase64String(movie.ImageData)" style="width: 300px;" class="rounded-5" />
+                        <img src="@movie.ImageUrl" style="width: 300px;" class="rounded-5" />
                         <h5>@movie.Title</h5>
-                        <p>@movie.Description</p>
+                        <p>@(movie.Description.Length > 200 ? movie.Description.Substring(0, Math.Min(200, movie.Description.Length)) + "..." : movie.Description)</p>
+                    @Html.ActionLink("Add to database", "MyMethod", "MyController", null, new { @class = "btn btn-primary" })
+
                     </div>
                 
             }

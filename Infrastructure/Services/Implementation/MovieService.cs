@@ -56,10 +56,10 @@ public class MovieService : IMovieService
         _movieRepository.DeleteMovie(movieId);
     }
 
-    public async Task<List<CreateMovieDTO>> GetTrendingMovies(int page = 1)
+    public async Task<List<TrendingMovieDTO>> GetTrendingMovies(int page = 1)
     {
-        var movies = new List<CreateMovieDTO>();
-        var response = await _httpClient.GetAsync($"/3/discover/movie?include_adult=false&include_video=false&language=en-US&page={page}&sort_by=popularity.desc&api_key={_settings.TmdbAPIKey}");
+        var movies = new List<TrendingMovieDTO>();
+        var response = await _httpClient.GetAsync($"/3/discover/movie?include_adult=true&include_video=false&language=en-US&page={page}&sort_by=popularity.desc&api_key={_settings.TmdbAPIKey}");
 
         if (!response.IsSuccessStatusCode)
         {
@@ -73,18 +73,13 @@ public class MovieService : IMovieService
         foreach (var movie in movieList.EnumerateArray())
         {
             var movieRoot = JsonDocument.Parse(movie.ToString()).RootElement;
-            var title = movieRoot.GetProperty("original_title").GetString();
-            var description = movieRoot.GetProperty("overview").GetString();
-            var image_url = movieRoot.GetProperty("backdrop_path").GetString();
-            byte[] imageBytes = await _httpClient.GetByteArrayAsync("https://image.tmdb.org/t/p/original" + image_url);
+            var title = movieRoot.GetProperty("original_title").GetString()!;
+            var description = movieRoot.GetProperty("overview").GetString()!;
+            var image_url = "https://image.tmdb.org/t/p/original" + movieRoot.GetProperty("backdrop_path").GetString()!;
+            //byte[] imageBytes = await _httpClient.GetByteArrayAsync("https://image.tmdb.org/t/p/original" + image_url);
             //TODO: Error handling
 
-            movies.Add(new CreateMovieDTO
-            {
-                Title = title,
-                Description = description,
-                ImageData = imageBytes
-            });
+            movies.Add(new TrendingMovieDTO(title, description, image_url));
 
             Console.WriteLine(movie);
         }

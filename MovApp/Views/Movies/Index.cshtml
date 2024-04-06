@@ -105,6 +105,41 @@
         }
     </table> *@
     
+    <div class="container mt-3">
+        <!-- Bootstrap alert message -->
+        @if (ViewBag.NewMovieCreated != null && (bool)ViewBag.NewMovieCreated)
+        {
+            <div id="alertMessage" class="alert alert-success" role="alert">
+                Movie saved successfully!
+            </div>
+            <script>
+                setTimeout(function () {
+                    var alertMessage = document.getElementById('alertMessage');
+                    if (alertMessage) {
+                        alertMessage.style.display = 'none';
+                    }
+                }, 2000);
+            </script>
+        }
+    </div>
+    <div class="container mt-3">
+        <!-- Bootstrap alert message -->
+        @if (ViewBag.MovieDeleted != null && (bool)ViewBag.MovieDeleted)
+        {
+            <div id="alertMessage" class="alert alert-success" role="alert">
+                Movie Deleted!
+            </div>
+            <script>
+                setTimeout(function () {
+                    var alertMessage = document.getElementById('alertMessage');
+                    if (alertMessage) {
+                        alertMessage.style.display = 'none';
+                    }
+                }, 2000);
+            </script>
+        }
+    </div>
+
     <div class="container text-center">
         <div class="row row-cols-4 gx-4 gy-2">
         @foreach(var movie in Model)

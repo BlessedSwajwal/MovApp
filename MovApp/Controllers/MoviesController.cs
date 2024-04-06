@@ -8,8 +8,10 @@ using System.Security.Claims;
 namespace MovApp.Controllers;
 public class MoviesController(IMovieService movieService) : Controller
 {
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(bool NewMovieCreated = false, bool MovieDeleted = false)
     {
+        ViewBag.NewMovieCreated = NewMovieCreated;
+        ViewBag.MovieDeleted = MovieDeleted;
         var movies = await movieService.GetAllMovieAsync();
         return View(movies);
     }
@@ -31,7 +33,7 @@ public class MoviesController(IMovieService movieService) : Controller
     public IActionResult Delete(Guid id)
     {
         movieService.DeleteMovie(id);
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { MovieDeleted = true });
     }
 
     [HttpPost]
@@ -51,7 +53,7 @@ public class MoviesController(IMovieService movieService) : Controller
             //TODO: Create the movie
             await movieService.CreateMovieAsync(model);
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { NewMovieCreated = true });
         }
         else
         {

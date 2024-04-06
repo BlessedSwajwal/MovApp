@@ -38,7 +38,7 @@ public class UserAuthenticationService : IUserAuthenticationService
         if (passwordCorrect)
         {
             Claim[] claims = [new Claim(ClaimTypes.Role, user.UserType)];
-            await signInManager.SignInWithClaimsAsync(user, false, claims);
+            await signInManager.SignInWithClaimsAsync(user, true, claims);
             //var signInResult = await signInManager.PasswordSignInAsync(user, model.Password, false, true);
             var token = _jwtGenerator.GenerateJwt(user, user.UserType);
             await Console.Out.WriteLineAsync(token);

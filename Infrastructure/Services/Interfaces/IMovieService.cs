@@ -8,6 +8,6 @@ public interface IMovieService
     void DeleteMovie(Guid movieId);
     Task<IReadOnlyList<MovieListDTO>> GetAllMovieAsync();
     Task<MovieDetailDTO> GetMovieDetail(Guid movieId);
-    Task<List<CreateMovieDTO>> GetTrendingMovies(int page = 1);
+    Task<List<TrendingMovieDTO>> GetTrendingMovies(int page = 1);
     Task PostComment(string commentText, Guid movieId, Guid commenterId, string commenterName);
 }
