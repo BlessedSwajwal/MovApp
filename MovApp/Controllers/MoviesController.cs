@@ -14,17 +14,16 @@ public class MoviesController(IMovieService movieService) : Controller
         return View(movies);
     }
 
-    [Authorize(Policy = "AdminRequirement")]
-    public async Task<IActionResult> MovieDashboard()
-    {
-        var movies = await movieService.GetAllMovieAsync();
-        return View(movies);
-    }
+    //[Authorize(Policy = "AdminRequirement")]
+    //public async Task<IActionResult> MovieDashboard()
+    //{
+    //    var movies = await movieService.GetAllMovieAsync();
+    //    return View(movies);
+    //}
 
     [Authorize(Policy = "AdminRequirement")]
     public IActionResult Create()
     {
-        var user = User;
         return View();
     }
 
@@ -32,7 +31,7 @@ public class MoviesController(IMovieService movieService) : Controller
     public IActionResult Delete(Guid id)
     {
         movieService.DeleteMovie(id);
-        return RedirectToAction(nameof(MovieDashboard));
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
@@ -52,7 +51,7 @@ public class MoviesController(IMovieService movieService) : Controller
             //TODO: Create the movie
             await movieService.CreateMovieAsync(model);
 
-            return RedirectToAction(nameof(MovieDashboard)); // Redirect to home or another action
+            return RedirectToAction(nameof(Index));
         }
         else
         {
@@ -75,14 +74,14 @@ public class MoviesController(IMovieService movieService) : Controller
     [HttpPost]
     public async Task<IActionResult> SubmitComment()
     {
+
         string commentText = Request.Form["comment"]!;
         string movieId = Request.Form["movieId"]!;
-        var user = User;
 
-        movieService.PostComment(commentText, Guid.Parse(movieId), Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value), User.Identity!.Name!);
 
-        //Process the comment here
+        await movieService.PostComment(commentText, Guid.Parse(movieId), Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value), User.Identity!.Name!);
 
-        return RedirectToAction(nameof(Index)); // Redirect to a thank you page or another action
+
+        return RedirectToAction(nameof(Detail), new { id = movieId });
     }
 }

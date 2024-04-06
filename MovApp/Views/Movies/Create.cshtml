@@ -4,10 +4,12 @@
 @{
     ViewData["Title"] = "Create Movie";
 }
-
+<img src="https://dg3fwljcbubde.cloudfront.net/Landing/landing-bg-ww.jpg" class="rounded-pill" alt="create-movie-landing-image" style="max-height: 300px; width: 100%; object-fit: fill" />
+<div class="w-75 d-flex flex-column align-items-center mt-2">
 @using (Html.BeginForm("Create", "Movies", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
-    <div class="form-group">
+    
+    <div style="width: 500px;" class="form-group">
         @Html.LabelFor(m => m.Title)
         @Html.TextBoxFor(m => m.Title, new { @class = "form-control" })
     </div>
@@ -32,7 +34,7 @@
         }
     }
 
-    <button type="submit" class="btn btn-primary">Create Movie</button>
-
+    <button type="submit" class="btn btn-primary mt-3">Create Movie</button>
 
 }
+</div>
