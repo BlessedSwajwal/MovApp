@@ -11,4 +11,5 @@ public interface IMovieRepository
     public Task<IReadOnlyList<Comment>> GetCommentsForAMovie(Guid movieId);
     Movie GetMovieDetail(Guid movieId);
     Task SaveAsync();
+    Task Update(Movie movie);
 }

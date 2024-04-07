@@ -12,15 +12,33 @@ public sealed class Movie
     private List<Guid> _commentIds = new();
     public IReadOnlyList<Guid> CommentIds => _commentIds.AsReadOnly();
 
-    public Movie(string name, string description, byte[] image)
+    private Movie(
+        Guid id,
+        string name,
+        string description,
+        byte[] image,
+        int rating,
+        int totalRates,
+        List<Guid> commentIds)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Name = name;
         Description = description;
         Image = image;
-        Rating = 0;
-        TotalRates = 0;
-        Console.WriteLine(Id);
+        Rating = rating;
+        TotalRates = totalRates;
+        _commentIds = commentIds;
+    }
+
+    public static Movie CreateNew(string name, string description, byte[] image)
+    {
+        return new(Guid.NewGuid(), name, description, image, 0, 0, new List<Guid>());
+
+    }
+
+    public static Movie Create(Guid id, string name, string description, byte[] image, int rating, int totalRates, List<Guid> commentIds)
+    {
+        return new(id, name, description, image, rating, totalRates, commentIds);
 
     }
 

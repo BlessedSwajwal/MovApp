@@ -53,4 +53,10 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         dbContext.Movies.Remove(GetMovieDetail(movieId));
         dbContext.SaveChanges();
     }
+
+    public async Task Update(Movie movie)
+    {
+        dbContext.Update(movie);
+        await dbContext.SaveChangesAsync();
+    }
 }

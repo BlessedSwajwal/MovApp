@@ -67,6 +67,34 @@ public class MoviesController(IMovieService movieService) : Controller
         return View(model);
     }
 
+    [Authorize(Policy = "AdminRequirement")]
+    public async Task<IActionResult> Update(Guid id)
+    {
+        var movie = await movieService.GetMovieDetail(id);
+        return View(movie);
+    }
+
+    [HttpPost]
+    [Authorize(Policy = "AdminRequirement")]
+    public async Task<IActionResult> Update(MovieDetailDTO movie, IFormFile? imageFile)
+    {
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await imageFile.CopyToAsync(memoryStream);
+                movie.Image = memoryStream.ToArray();
+            }
+        }
+        if (ModelState.IsValid)
+        {
+            await movieService.Update(movie);
+            return RedirectToAction(nameof(Detail), new { Id = movie.Id });
+        }
+
+        return View(movie);
+    }
+
     public async Task<IActionResult> Detail(Guid id)
     {
         var movie = new MovieDetailViewModel(User, await movieService.GetMovieDetail(id));

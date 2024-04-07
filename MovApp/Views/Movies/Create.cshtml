@@ -24,9 +24,9 @@
         <input type="file" name="imageFile" id="imageFile" class="form-control" />
     </div>
 
-    @if (TempData["msg"] != null && ((List<string>) TempData["msg"]).Any())
+    @if (TempData["msg"] != null && ((List<string>) TempData["msg"]!).Any())
     {
-        foreach (string error in (List<string>)TempData["msg"])
+        foreach (string error in (List<string>)TempData["msg"]!)
         {
             <div class="form-group">
                 <span class="text-info">@error</span>

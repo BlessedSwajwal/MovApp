@@ -22,7 +22,7 @@ public class MovieService : IMovieService
 
     public async Task<Movie> CreateMovieAsync(CreateMovieDTO createMovieDTO)
     {
-        var movie = new Movie(createMovieDTO.Title, createMovieDTO.Description, createMovieDTO.ImageData);
+        var movie = Movie.CreateNew(createMovieDTO.Title, createMovieDTO.Description, createMovieDTO.ImageData);
 
         _movieRepository.Create(movie);
         await _movieRepository.SaveAsync();
@@ -85,6 +85,13 @@ public class MovieService : IMovieService
         }
 
         return movies;
+    }
+
+    public async Task Update(MovieDetailDTO updatedMovie)
+    {
+        var commentIds = updatedMovie.Comments.Select(c => c.Id).ToList();
+        var movie = Movie.Create(updatedMovie.Id, updatedMovie.Name, updatedMovie.Description, updatedMovie.Image, updatedMovie.Rating, updatedMovie.TotalRates, commentIds);
+        await _movieRepository.Update(movie);
     }
 
 }

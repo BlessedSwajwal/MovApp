@@ -10,4 +10,5 @@ public interface IMovieService
     Task<MovieDetailDTO> GetMovieDetail(Guid movieId);
     Task<List<TrendingMovieDTO>> GetTrendingMovies(int page = 1);
     Task PostComment(string commentText, Guid movieId, Guid commenterId, string commenterName);
+    Task Update(MovieDetailDTO updatedMovie);
 }

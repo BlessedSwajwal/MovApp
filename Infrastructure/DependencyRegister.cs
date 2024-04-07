@@ -1,7 +1,6 @@
 ﻿using Infrastructure.Authentication;
 using Infrastructure.Authentication.Implementation;
 using Infrastructure.Authentication.Interfaces;
-using Infrastructure.Authorization;
 using Infrastructure.Data;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories.Implementation;
@@ -9,13 +8,13 @@ using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace Infrastructure;
@@ -79,11 +78,10 @@ public static class DependencyRegister
         {
             options.AddPolicy("AdminRequirement", policy =>
             {
-                policy.Requirements.Add(new AdminEmailRequirement());
+                policy.RequireClaim(ClaimTypes.Role, UserRoles.admin);
             });
         });
 
-        services.AddSingleton<IAuthorizationHandler, AdminEmailRequirementHandler>();
     }
 
     public static void AddServicesAndRepo(IServiceCollection services)

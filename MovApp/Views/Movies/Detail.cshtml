@@ -67,10 +67,13 @@
             var email = @Model.User.FindFirstValue(ClaimTypes.Email)!;
         }
 
-        @if(email.Equals("admin@admin.com", StringComparison.OrdinalIgnoreCase))
+        @if (Model.User.FindFirstValue(ClaimTypes.Role) is not null && Model.User.FindFirstValue(ClaimTypes.Role)!.Equals(UserRoles.admin, StringComparison.OrdinalIgnoreCase))
         {
             <a class="button" href="@Url.Action($"Delete", "Movies", new { id = movie.Id })">Delete</a>
             <br/>
+            <a class="button" href="@Url.Action($"Update", "Movies", new { id = movie.Id })">Edit</a>
+            <br/>
+
         }
 
         
