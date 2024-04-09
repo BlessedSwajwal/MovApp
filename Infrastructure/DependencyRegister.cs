@@ -5,6 +5,8 @@ using Infrastructure.Data;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories.Implementation;
 using Infrastructure.Repositories.Interfaces;
+using Infrastructure.Services.Email;
+using Infrastructure.Services.EmailService;
 using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -26,7 +28,7 @@ public static class DependencyRegister
 
 
         AddAuth(services, configuration);
-        AddServicesAndRepo(services);
+        AddServicesAndRepo(services, configuration);
 
         services.AddIdentity<ApplicationUser, IdentityRole>()
              .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -84,16 +86,22 @@ public static class DependencyRegister
 
     }
 
-    public static void AddServicesAndRepo(IServiceCollection services)
+    public static void AddServicesAndRepo(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<IEmailService, EmailService>();
+
         services.AddHttpClient<IMovieService, MovieService>(op =>
         {
             op.BaseAddress = new Uri("https://api.themoviedb.org");
         });
+
         services.AddScoped<IMovieRepository, MovieRepository>();
 
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
         //services.AddScoped<IMovieService, MovieService>();
+        var emailSettings = new EmailSettings();
+        configuration.GetSection(EmailSettings.SectionName).Bind(emailSettings);
+        services.AddSingleton(Options.Create<EmailSettings>(emailSettings));
     }
 
 

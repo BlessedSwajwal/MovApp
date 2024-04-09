@@ -6,13 +6,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Repositories.Implementation;
 public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
 {
-    public async Task SaveAsync()
-    {
-        await dbContext.SaveChangesAsync();
-    }
-    public void Create(Movie movie)
+    public async Task Create(Movie movie)
     {
         dbContext.Movies.Add(movie);
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task<IReadOnlyList<Movie>> GetAllAsync()
@@ -27,14 +24,14 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         return comments.AsReadOnly();
     }
 
-    public Comment? GetCommentById(Guid id)
+    public async Task<Comment?> GetCommentById(Guid id)
     {
-        return dbContext.Comments.SingleOrDefault(c => c.Id == id);
+        return await dbContext.Comments.SingleOrDefaultAsync(c => c.Id == id);
     }
 
-    public Movie GetMovieDetail(Guid movieId)
+    public async Task<Movie> GetMovieDetail(Guid movieId)
     {
-        var movie = dbContext.Movies.SingleOrDefault(m => m.Id == movieId);
+        var movie = await dbContext.Movies.SingleOrDefaultAsync(m => m.Id == movieId);
         if (movie is null)
         {
             return Movie.Empty;
@@ -42,21 +39,45 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         return movie;
     }
 
-    public void AddComment(Comment comment)
+    public async Task AddComment(Comment comment)
     {
         dbContext.Comments.Add(comment);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
     }
 
-    public void DeleteMovie(Guid movieId)
+    public async Task DeleteMovie(Guid movieId)
     {
-        dbContext.Movies.Remove(GetMovieDetail(movieId));
-        dbContext.SaveChanges();
+        dbContext.Movies.Remove(await GetMovieDetail(movieId));
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task Update(Movie movie)
     {
         dbContext.Update(movie);
         await dbContext.SaveChangesAsync();
+    }
+
+    public async Task AddRating(Movie movie, string userId, int Rating)
+    {
+        movie.Rating += Rating;
+        movie.TotalRates++;
+        //dbContext.Update(movie);
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+        $@"EXEC UpdateMovie 
+            {movie.Id}, 
+            {movie.Name}, 
+            {movie.Description}, 
+            {movie.Rating}, 
+            {movie.TotalRates}, 
+            {movie.Image}");
+        var rating = new Ratings(movie.Id, userId, Rating);
+        dbContext.Ratings.Add(rating);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<bool> HasUserRatedMovie(Guid movieId, string userId)
+    {
+        await Task.CompletedTask;
+        return dbContext.Ratings.Any(rt => (rt.RatersId == userId && rt.MovieId == movieId));
     }
 }

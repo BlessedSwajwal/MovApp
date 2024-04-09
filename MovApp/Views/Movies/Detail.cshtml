@@ -51,7 +51,7 @@
         <div class="movie-info">
             <h1>@movie.Name</h1>
             <p>@movie.Description</p>
-            <p>Rating: @movie.Rating</p>
+            <p>Rating: @( movie.TotalRates == 0? 0 : movie.Rating / (float) movie.TotalRates)</p>
             <!-- Other movie details (TotalRates, Comments, etc.) go here -->
         </div>
         @using (Html.BeginForm("SubmitComment", "Movies", FormMethod.Post))
@@ -76,7 +76,18 @@
 
         }
 
-        
+        @if (ViewBag.HasRated is not null && ViewBag.HasRated == false)
+        {
+            @using (Html.BeginForm("Rate", "Movies", FormMethod.Post))
+            {
+
+                <input type="number" id="rating" name="rating" />
+                <input type="text" id="userId" name="userId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" hidden />
+                <input type="text" id="movieId" name="movieId" value="@Model.movieDetailDTO.Id" hidden />
+
+                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+            }
+        }
 
         @foreach (var comment in movie.Comments)
         {

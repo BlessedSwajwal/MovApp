@@ -1,4 +1,5 @@
 ﻿using Infrastructure.DTOs.Movie;
+using Infrastructure.Services.Email;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,7 @@ using MovApp.Models;
 using System.Security.Claims;
 
 namespace MovApp.Controllers;
-public class MoviesController(IMovieService movieService) : Controller
+public class MoviesController(IMovieService movieService, IEmailService emailService) : Controller
 {
     public async Task<IActionResult> Index(bool NewMovieCreated = false, bool MovieDeleted = false)
     {
@@ -97,7 +98,11 @@ public class MoviesController(IMovieService movieService) : Controller
 
     public async Task<IActionResult> Detail(Guid id)
     {
-        var movie = new MovieDetailViewModel(User, await movieService.GetMovieDetail(id));
+        var movieDTO = await movieService.GetMovieDetail(id);
+        var hasRated = await movieService.HasUserAlreadyRated(id, User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        ViewBag.HasRated = hasRated;
+
+        var movie = new MovieDetailViewModel(User, movieDTO);
         return View(movie);
     }
 
@@ -107,7 +112,6 @@ public class MoviesController(IMovieService movieService) : Controller
 
         string commentText = Request.Form["comment"]!;
         string movieId = Request.Form["movieId"]!;
-
 
         await movieService.PostComment(commentText, Guid.Parse(movieId), Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value), User.Identity!.Name!);
 
@@ -119,5 +123,20 @@ public class MoviesController(IMovieService movieService) : Controller
     {
         var movies = await movieService.GetTrendingMovies(page);
         return View(movies);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Rate(Guid movieId, string userId, int rating)
+    {
+        var movieDTO = await movieService.GetMovieDetail(movieId);
+        await movieService.AddRating(movieDTO, userId, rating);
+        return RedirectToAction(nameof(Detail), new { Id = movieId });
+    }
+
+    public async Task<IActionResult> EmailShare([FromQuery] Guid movieId, [FromQuery] string to)
+    {
+        var movie = await movieService.GetMovieDetail(movieId);
+        await emailService.ShareMovie(to, movie);
+        return RedirectToAction(nameof(Detail), new { Id = movieId });
     }
 }

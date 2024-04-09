@@ -9,8 +9,8 @@ public sealed class Movie
     public int TotalRates { get; set; }
     public byte[] Image { get; set; }
 
-    private List<Guid> _commentIds = new();
-    public IReadOnlyList<Guid> CommentIds => _commentIds.AsReadOnly();
+    //private List<Guid> _commentIds = new();
+    //public IReadOnlyList<Guid> CommentIds => _commentIds.AsReadOnly();
 
     private Movie(
         Guid id,
@@ -27,7 +27,6 @@ public sealed class Movie
         Image = image;
         Rating = rating;
         TotalRates = totalRates;
-        _commentIds = commentIds;
     }
 
     public static Movie CreateNew(string name, string description, byte[] image)
@@ -66,5 +65,21 @@ public class Comment
 #pragma warning disable CS8618
     private Comment() { }
 #pragma warning restore CS8618
+}
+
+public class Ratings
+{
+    public Guid Id;
+    public Guid MovieId { get; set; }
+    public string RatersId { get; set; }
+    public int Rating { get; set; }
+
+    public Ratings(Guid movieId, string ratersId, int rating)
+    {
+        Id = Guid.NewGuid();
+        RatersId = ratersId;
+        Rating = rating;
+        MovieId = movieId;
+    }
 }
 

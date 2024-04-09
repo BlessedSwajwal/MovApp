@@ -68,7 +68,7 @@
 </head>
 <body>
     <h1>Movies List</h1>
-    @if(User.FindFirstValue(ClaimTypes.Role)!.Equals(UserRoles.admin, StringComparison.OrdinalIgnoreCase))
+    @if (User.FindFirstValue(ClaimTypes.Role) is not null && User.FindFirstValue(ClaimTypes.Role)!.Equals(UserRoles.admin, StringComparison.OrdinalIgnoreCase))
     {
         <a class="button" href="@Url.Action($"Create", "Movies")">Add new</a>
         <br />

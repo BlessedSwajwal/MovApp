@@ -24,8 +24,7 @@ public class MovieService : IMovieService
     {
         var movie = Movie.CreateNew(createMovieDTO.Title, createMovieDTO.Description, createMovieDTO.ImageData);
 
-        _movieRepository.Create(movie);
-        await _movieRepository.SaveAsync();
+        await _movieRepository.Create(movie);
         return movie;
     }
 
@@ -38,7 +37,7 @@ public class MovieService : IMovieService
 
     public async Task<MovieDetailDTO> GetMovieDetail(Guid movieId)
     {
-        var movie = _movieRepository.GetMovieDetail(movieId);
+        var movie = await _movieRepository.GetMovieDetail(movieId);
         var comments = await _movieRepository.GetCommentsForAMovie(movieId);
         var result = movie.BuildAdapter().AddParameters("Comments", comments).AdaptToType<MovieDetailDTO>();
         return result;
@@ -47,7 +46,7 @@ public class MovieService : IMovieService
     public async Task PostComment(string commentText, Guid movieId, Guid commenterId, string commenterName)
     {
         var comment = new Comment(Guid.NewGuid(), commentText, movieId, commenterId, commenterName);
-        _movieRepository.AddComment(comment);
+        await _movieRepository.AddComment(comment);
         //await movieRepository.SaveAsync();
     }
 
@@ -94,4 +93,16 @@ public class MovieService : IMovieService
         await _movieRepository.Update(movie);
     }
 
+
+    public async Task AddRating(MovieDetailDTO movieDto, string userId, int Rating)
+    {
+        var movie = Movie.Create(movieDto.Id, movieDto.Name, movieDto.Description, movieDto.Image, movieDto.Rating, movieDto.TotalRates, new List<Guid>());
+        await _movieRepository.AddRating(movie, userId, Rating);
+    }
+
+    public async Task<bool> HasUserAlreadyRated(Guid movieId, string userId)
+    {
+        var hasRated = await _movieRepository.HasUserRatedMovie(movieId, userId);
+        return hasRated;
+    }
 }
