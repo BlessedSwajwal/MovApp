@@ -34,6 +34,11 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
                 {movie.Image}");
     }
 
+    public Task Delete(Guid movieId)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task DeleteMovie(Guid movieId)
     {
         await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC RemoveMovie {movieId}");

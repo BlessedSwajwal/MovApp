@@ -50,9 +50,9 @@ public class MovieService : IMovieService
         //await movieRepository.SaveAsync();
     }
 
-    public void DeleteMovie(Guid movieId)
+    public async Task DeleteMovie(Guid movieId)
     {
-        _movieRepository.DeleteMovie(movieId);
+        await _movieRepository.DeleteMovie(movieId);
     }
 
     public async Task<List<TrendingMovieDTO>> GetTrendingMovies(int page = 1)

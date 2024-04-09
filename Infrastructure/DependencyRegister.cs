@@ -27,17 +27,14 @@ public static class DependencyRegister
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var conn_string = configuration.GetConnectionString("MovApp");
+
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(conn_string));
 
-
         AddServicesAndRepo(services, configuration);
-
         services.AddIdentity<ApplicationUser, IdentityRole>()
              .AddEntityFrameworkStores<ApplicationDbContext>();
 
         AddAuth(services, configuration);
-
-        //AddAdmin.Add(configuration.GetValue<string>("AdminPassword")!);
 
         //Movie settings
         var tmdbSettings = new TmdbSettings();
@@ -105,7 +102,6 @@ public static class DependencyRegister
         {
             services.AddScoped<IMovieRepository, MovieRepository>();
         }
-
 
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
         //services.AddScoped<IMovieService, MovieService>();

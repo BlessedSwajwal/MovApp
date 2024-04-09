@@ -31,9 +31,9 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     }
 
     [Authorize(Policy = "AdminRequirement")]
-    public IActionResult Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        movieService.DeleteMovie(id);
+        await movieService.DeleteMovie(id);
         return RedirectToAction(nameof(Index), new { MovieDeleted = true });
     }
 
