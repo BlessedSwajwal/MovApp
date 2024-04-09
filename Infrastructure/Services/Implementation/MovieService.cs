@@ -105,4 +105,11 @@ public class MovieService : IMovieService
         var hasRated = await _movieRepository.HasUserRatedMovie(movieId, userId);
         return hasRated;
     }
+
+    public async Task<byte[]> FetchImageAsync(string imageUrl)
+    {
+        byte[] imageBytes = await _httpClient.GetByteArrayAsync(imageUrl);
+        //TODO: Error handling in case http request is not successful
+        return imageBytes;
+    }
 }

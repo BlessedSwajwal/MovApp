@@ -121,6 +121,7 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
 
     public async Task<IActionResult> Trending([FromQuery] int page = 1)
     {
+        ViewBag.currentPage = page;
         var movies = await movieService.GetTrendingMovies(page);
         return View(movies);
     }
@@ -133,10 +134,21 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
         return RedirectToAction(nameof(Detail), new { Id = movieId });
     }
 
-    public async Task<IActionResult> EmailShare([FromQuery] Guid movieId, [FromQuery] string to)
+    [HttpPost]
+    public async Task<IActionResult> EmailShare(Guid movieId, string to)
     {
         var movie = await movieService.GetMovieDetail(movieId);
         await emailService.ShareMovie(to, movie);
         return RedirectToAction(nameof(Detail), new { Id = movieId });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddTrending(string title, string description, string imageUrl, int? currentPage = 1)
+    {
+        var image_data = await movieService.FetchImageAsync(imageUrl);
+        var createMovieDTO = new CreateMovieDTO() { Title = title, Description = description, ImageData = image_data };
+        var movie = await movieService.CreateMovieAsync(createMovieDTO);
+        TempData["msg"] = "Movie added succesfully!";
+        return RedirectToAction(nameof(Trending), new { page = currentPage });
     }
 }

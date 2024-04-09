@@ -7,93 +7,92 @@
     var movie = Model.movieDetailDTO;
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <!-- Add your CSS styles here -->
-    <style>
-        .movie-details {
-            background-color: #f9f9f9;
-            padding: 20px;
-            margin: 0 auto;
-            max-width: 1200px; /* Optional: Limit the width of the container */
-        }
 
-        .movie-image {
-            width: 100%;
-            height: 500px;
-            object-fit: cover;
-        }
-
-        .movie-info {
-            /* Add styles for other movie details (Title, Description, Rating, etc.) */
-            margin-top: 20px;
-        }
-
-        .button {
-            background-color: #4CAF50; /* Green */
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-    </style>
-</head>
-<body>
     <div class="movie-details">
-        <img class="movie-image" src="data:image/jpeg;base64,@Convert.ToBase64String(movie.Image)" alt="Movie Poster">
+        <img class="movie-image" style=" width: 100%; height: 500px; object-fit: cover;" src="data:image/jpeg;base64,@Convert.ToBase64String(movie.Image)" alt="Movie Poster">
         <div class="movie-info">
-            <h1>@movie.Name</h1>
-            <p>@movie.Description</p>
-            <p>Rating: @( movie.TotalRates == 0? 0 : movie.Rating / (float) movie.TotalRates)</p>
+            <h1 class="text-center mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-6xl">@movie.Name</h1>
+            <p class="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">@movie.Description</p>
+            @* <h1>@movie.Name</h1>
+            <br />
+            <p>@movie.Description</p> *@
+
+            @if (Model.User.FindFirstValue(ClaimTypes.Role) is not null && Model.User.FindFirstValue(ClaimTypes.Role)!.Equals(UserRoles.admin, StringComparison.OrdinalIgnoreCase))
+            {
+                <div style="display: flex" class="m-2 gap-2">
+                    <a class="btn btn-danger" href="@Url.Action($"Delete", "Movies", new { id = movie.Id })">Delete</a>
+
+                    <a class="btn btn-primary" href="@Url.Action($"Update", "Movies", new { id = movie.Id })">Edit</a>
+
+                </div>
+            }
+            
+            @{
+                var movieRating = movie.TotalRates == 0 ? 0 : movie.Rating / (float)movie.TotalRates;
+            }
+
+            <p>Rating: @movieRating</p>
+            <div class="flex items-center">
+                @for(int i = 0; i < Math.Round(movieRating); i++) {
+                <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                </svg>
+                }
+            </div>
             <!-- Other movie details (TotalRates, Comments, etc.) go here -->
         </div>
-        @using (Html.BeginForm("SubmitComment", "Movies", FormMethod.Post))
-        {
-            <h5>Your comment: </h5>
-            <textarea type="text" id="comment" name="comment" rows="4" cols="50"></textarea>
-            <br />
-            <input type="text" id="movieId" name="movieId" hidden value="@movie.Id" />
-            <button type="submit" class="btn btn-primary mt-3">Submit</button>
-        }
-
-        @{
-            var email = @Model.User.FindFirstValue(ClaimTypes.Email)!;
-        }
-
-        @if (Model.User.FindFirstValue(ClaimTypes.Role) is not null && Model.User.FindFirstValue(ClaimTypes.Role)!.Equals(UserRoles.admin, StringComparison.OrdinalIgnoreCase))
-        {
-            <a class="button" href="@Url.Action($"Delete", "Movies", new { id = movie.Id })">Delete</a>
-            <br/>
-            <a class="button" href="@Url.Action($"Update", "Movies", new { id = movie.Id })">Edit</a>
-            <br/>
-
-        }
-
         @if (ViewBag.HasRated is not null && ViewBag.HasRated == false)
         {
             @using (Html.BeginForm("Rate", "Movies", FormMethod.Post))
             {
+                <div style="display: flex">
+                    <h6>Rate the movie: </h6>      
+                    <input type="number" min="0" max="10" id="rating" name="rating" />
+                    <input type="text" id="userId" name="userId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" hidden />
+                    <input type="text" id="movieId" name="movieId" value="@Model.movieDetailDTO.Id" hidden />
 
-                <input type="number" id="rating" name="rating" />
-                <input type="text" id="userId" name="userId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" hidden />
-                <input type="text" id="movieId" name="movieId" value="@Model.movieDetailDTO.Id" hidden />
-
-                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                </div>
             }
         }
+
+
+        @using (Html.BeginForm("SubmitComment", "Movies", FormMethod.Post))
+        {
+            <div style="display: flex; flex-direction: column; gap: 10px; align-items: center" class="mt-3">
+                <textarea name="comment" id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your comment here..."></textarea>
+                <input type="text" class="rounded" id="movieId" name="movieId" hidden value="@movie.Id" />
+                <button type="submit" class="text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-4 focus:ring-purple-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Post Comment</button>
+            </div>
+            @* <div style="display: flex" class="gap-2 align-items-center m-4">
+                <h5>Your comment: </h5>
+                <textarea type="text" id="comment" name="comment" rows="4" cols="50"></textarea>
+          
+                <input type="text" class="rounded" id="movieId" name="movieId" hidden value="@movie.Id" />
+                <button type="submit" style="background-color: green; color: white" class="btn p-3">Post Comment</button>
+            </div> *@
+        }
+
+
+        
 
         @foreach (var comment in movie.Comments)
         {
             <strong>@comment.CommenterName:</strong> @comment.Description
             <br />
         }
+
+       @using (Html.BeginForm("EmailShare", "Movies", FormMethod.Post))
+        {
+            <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 50px;">
+                <h5>Share: </h5>
+                @* <input type="email" id="to" name="to" class="p-2"/> *@
+            <div>
+                <input type="email" id="email" name="to" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="john.doe@company.com" required />
+            </div>
+            <input type="text" id="movieId" name="movieId" hidden value="@movie.Id"/>
+                <button type="submit" class="btn btn-primary mt-3">Send</button>
+            </div>
+        } 
+        
     </div>
-</body>
-</html>

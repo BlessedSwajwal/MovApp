@@ -7,6 +7,7 @@ public interface IMovieService
     Task AddRating(MovieDetailDTO movieDto, string userId, int Rating);
     public Task<Movie> CreateMovieAsync(CreateMovieDTO createMovieDTO);
     void DeleteMovie(Guid movieId);
+    Task<byte[]> FetchImageAsync(string imageUrl);
     Task<IReadOnlyList<MovieListDTO>> GetAllMovieAsync();
     Task<MovieDetailDTO> GetMovieDetail(Guid movieId);
     Task<List<TrendingMovieDTO>> GetTrendingMovies(int page = 1);

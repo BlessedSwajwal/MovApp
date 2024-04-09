@@ -5,11 +5,13 @@ using Infrastructure.Data;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories.Implementation;
 using Infrastructure.Repositories.Interfaces;
+using Infrastructure.Repositories.SQLImplementation;
 using Infrastructure.Services.Email;
 using Infrastructure.Services.EmailService;
 using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,18 +26,18 @@ public static class DependencyRegister
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("MovApp")));
+        var conn_string = configuration.GetConnectionString("MovApp");
+        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(conn_string));
 
 
-        AddAuth(services, configuration);
         AddServicesAndRepo(services, configuration);
 
         services.AddIdentity<ApplicationUser, IdentityRole>()
              .AddEntityFrameworkStores<ApplicationDbContext>();
 
+        AddAuth(services, configuration);
+
         //AddAdmin.Add(configuration.GetValue<string>("AdminPassword")!);
-
-
 
         //Movie settings
         var tmdbSettings = new TmdbSettings();
@@ -51,28 +53,29 @@ public static class DependencyRegister
         configuration.GetSection(JwtSettings.SectionName).Bind(jwtSettings);
         services.AddSingleton(Options.Create<JwtSettings>(jwtSettings));
 
-        //Add Authentication
-        services.AddAuthentication(options =>
+        if (configuration.GetValue<string>("ProjType")!.Equals("MVC"))
         {
-            options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        })
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
             {
-                options.LoginPath = "/UserAuthentication/Login";
 
-            })
-            .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters()
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidAudience = jwtSettings.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
             });
+        }
+        else
+        {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+                });
+
+        }
 
         services.AddSingleton<IJwtGenerator, JwtGenerator>();
 
@@ -83,7 +86,6 @@ public static class DependencyRegister
                 policy.RequireClaim(ClaimTypes.Role, UserRoles.admin);
             });
         });
-
     }
 
     public static void AddServicesAndRepo(IServiceCollection services, IConfiguration configuration)
@@ -95,7 +97,15 @@ public static class DependencyRegister
             op.BaseAddress = new Uri("https://api.themoviedb.org");
         });
 
-        services.AddScoped<IMovieRepository, MovieRepository>();
+        if (configuration.GetValue<bool>("UseSql"))
+        {
+            services.AddScoped<IMovieRepository, SQLMovieRepository>();
+        }
+        else
+        {
+            services.AddScoped<IMovieRepository, MovieRepository>();
+        }
+
 
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
         //services.AddScoped<IMovieService, MovieService>();

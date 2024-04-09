@@ -1,12 +1,13 @@
 using Infrastructure;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
+
 builder.Services.AddInfrastructure(builder.Configuration);
-
-
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -21,9 +22,9 @@ builder.Services.AddControllersWithViews();
     builder.Services.AddSingleton(config);
 }
 
+
+
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
