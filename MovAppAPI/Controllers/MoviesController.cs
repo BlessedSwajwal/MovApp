@@ -13,9 +13,8 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
 {
 
     [HttpGet]
-    public async Task<IActionResult> All()
+    public async Task<IActionResult> All(int page = 0)
     {
-        int page = 0;
         var movies = await movieService.GetMovies(page);
         return Ok(movies);
     }
