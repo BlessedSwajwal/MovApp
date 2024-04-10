@@ -1,21 +1,21 @@
 ﻿using Infrastructure.DTOs.Movie;
 using Infrastructure.Services.Email;
 using Infrastructure.Services.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace MovieAppAPI.Controllers;
+namespace MovAppAPI.Controllers;
+
 [Route("Movies")]
 [ApiController]
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class MoviesController(IMovieService movieService, IEmailService emailService) : ControllerBase
 {
 
     [HttpGet]
-    public async Task<IActionResult> All(int page = 0, bool NewMovieCreated = false, bool MovieDeleted = false)
+    public async Task<IActionResult> All()
     {
+        int page = 0;
         var movies = await movieService.GetMovies(page);
         return Ok(movies);
     }
@@ -66,18 +66,7 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     [Authorize(Policy = "AdminRequirement")]
     public async Task<IActionResult> Update(MovieDetailDTO updatedMovie)
     {
-
-        //if (imageFile != null && imageFile.Length > 0)
-        //{
-        //    using (var memoryStream = new MemoryStream())
-        //    {
-        //        await imageFile.CopyToAsync(memoryStream);
-        //        movie.Image = memoryStream.ToArray();
-        //    }
-        //}
-
         await movieService.Update(updatedMovie);
-
         return Ok("Updated");
     }
 
