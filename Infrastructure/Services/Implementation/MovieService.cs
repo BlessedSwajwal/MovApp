@@ -28,9 +28,9 @@ public class MovieService : IMovieService
         return movie;
     }
 
-    public async Task<IReadOnlyList<MovieListDTO>> GetAllMovieAsync()
+    public async Task<IReadOnlyList<MovieListDTO>> GetMovies(int page)
     {
-        var movies = await _movieRepository.GetAllAsync();
+        var movies = await _movieRepository.GetMovies(page);
         var movieDTOs = movies.Adapt<List<MovieListDTO>>();
         return movieDTOs.AsReadOnly();
     }
@@ -43,7 +43,7 @@ public class MovieService : IMovieService
         return result;
     }
 
-    public async Task PostComment(string commentText, Guid movieId, Guid commenterId, string commenterName)
+    public async Task PostComment(string commentText, Guid movieId, string commenterId, string commenterName)
     {
         var comment = new Comment(Guid.NewGuid(), commentText, movieId, commenterId, commenterName);
         await _movieRepository.AddComment(comment);
@@ -112,4 +112,5 @@ public class MovieService : IMovieService
         //TODO: Error handling in case http request is not successful
         return imageBytes;
     }
+
 }

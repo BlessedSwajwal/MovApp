@@ -49,11 +49,11 @@ public sealed class Movie
 public class Comment
 {
     public Guid Id { get; set; }
-    public Guid CommenterId { get; set; }
+    public string CommenterId { get; set; }
     public string CommenterName { get; set; }
     public Guid MovieId { get; set; }
     public string Description { get; set; }
-    public Comment(Guid id, string description, Guid movieId, Guid commenterId, string commenterName)
+    public Comment(Guid id, string description, Guid movieId, string commenterId, string commenterName)
     {
         Id = id;
         Description = description;

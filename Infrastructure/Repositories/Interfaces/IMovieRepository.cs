@@ -7,7 +7,7 @@ public interface IMovieRepository
     Task AddRating(Movie movie, string userId, int Rating);
     public Task Create(Movie movie);
     Task DeleteMovie(Guid movieId);
-    public Task<IReadOnlyList<Movie>> GetAllAsync();
+    public Task<IReadOnlyList<Movie>> GetMovies(int page);
 
     public Task<IReadOnlyList<Comment>> GetCommentsForAMovie(Guid movieId);
     Task<Movie> GetMovieDetail(Guid movieId);

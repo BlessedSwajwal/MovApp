@@ -44,7 +44,7 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
         await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC RemoveMovie {movieId}");
     }
 
-    public async Task<IReadOnlyList<Movie>> GetAllAsync()
+    public async Task<IReadOnlyList<Movie>> GetMovies(int page = 1)
     {
         var movies = await dbContext.Movies.FromSqlRaw("EXEC GetAllMovies").ToListAsync();
 

@@ -9,11 +9,12 @@ using System.Security.Claims;
 namespace MovApp.Controllers;
 public class MoviesController(IMovieService movieService, IEmailService emailService) : Controller
 {
-    public async Task<IActionResult> Index(bool NewMovieCreated = false, bool MovieDeleted = false)
+    public async Task<IActionResult> Index(bool NewMovieCreated = false, bool MovieDeleted = false, int page = 0)
     {
         ViewBag.NewMovieCreated = NewMovieCreated;
         ViewBag.MovieDeleted = MovieDeleted;
-        var movies = await movieService.GetAllMovieAsync();
+        ViewBag.Page = page;
+        var movies = await movieService.GetMovies(page);
         return View(movies);
     }
 
@@ -113,7 +114,7 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
         string commentText = Request.Form["comment"]!;
         string movieId = Request.Form["movieId"]!;
 
-        await movieService.PostComment(commentText, Guid.Parse(movieId), Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value), User.Identity!.Name!);
+        await movieService.PostComment(commentText, Guid.Parse(movieId), User.FindFirstValue(ClaimTypes.NameIdentifier)!, User.Identity!.Name!);
 
 
         return RedirectToAction(nameof(Detail), new { id = movieId });

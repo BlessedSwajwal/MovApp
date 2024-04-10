@@ -66,7 +66,7 @@
         }
     </style>
 </head>
-<body>
+<body class="mb-5">
     <h1>Movies List</h1>
     @if (User.FindFirstValue(ClaimTypes.Role) is not null && User.FindFirstValue(ClaimTypes.Role)!.Equals(UserRoles.admin, StringComparison.OrdinalIgnoreCase))
     {
@@ -152,6 +152,23 @@
             </a>
         }
         </div>
+    </div>
+
+    <div class="flex justify-center">
+        <!-- Previous Button -->
+        @if (ViewBag.page is not null && (int)ViewBag.page != 0)
+        {
+            <a href="@Url.Action("Index", "Movies", new {page = ViewBag.page - 1})" class="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                Previous
+            </a>
+        }
+        <!-- Next Button -->
+        @if (Model.Count() == 10)
+        {
+            <a href="@Url.Action("Index", "Movies", new {page = ViewBag.page + 1})" class="flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                Next
+        </a>
+        }
     </div>
     </body>
 

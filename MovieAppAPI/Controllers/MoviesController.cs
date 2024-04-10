@@ -1,4 +1,5 @@
 ﻿using Infrastructure.DTOs.Movie;
+using Infrastructure.Services.Email;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -9,8 +10,16 @@ namespace MovieAppAPI.Controllers;
 [Route("Movies")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-public class MoviesController(IMovieService movieService) : ControllerBase
+public class MoviesController(IMovieService movieService, IEmailService emailService) : ControllerBase
 {
+
+    [HttpGet]
+    public async Task<IActionResult> All(int page = 0, bool NewMovieCreated = false, bool MovieDeleted = false)
+    {
+        var movies = await movieService.GetMovies(page);
+        return Ok(movies);
+    }
+
     [HttpPost("Create")]
     [Authorize(Policy = "AdminRequirement")]
     public async Task<ActionResult> Create(CreateMovieDTO model, IFormFile imageFile)
@@ -70,6 +79,53 @@ public class MoviesController(IMovieService movieService) : ControllerBase
         await movieService.Update(updatedMovie);
 
         return Ok("Updated");
+    }
+
+    [HttpPost("Comment")]
+    public async Task<IActionResult> SubmitComment(Guid movieId, string commentText)
+    {
+
+        await movieService.PostComment(commentText, movieId, User.FindFirstValue(ClaimTypes.NameIdentifier)!, User.Identity!.Name!);
+
+
+        return Ok(new { movieId, commentText });
+    }
+
+    [HttpGet("Trending")]
+    public async Task<IActionResult> Trending([FromQuery] int page = 1)
+    {
+        var movies = await movieService.GetTrendingMovies(page);
+        return Ok(movies);
+    }
+
+    [HttpPost("Rate")]
+    public async Task<IActionResult> Rate(Guid movieId, int rating)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var movieDTO = await movieService.GetMovieDetail(movieId);
+        await movieService.AddRating(movieDTO, userId, rating);
+        return Ok(new { movieDTO, rated = rating });
+    }
+
+    [HttpPost("Share")]
+    public async Task<IActionResult> EmailShare(Guid movieId, string to)
+    {
+        var movie = await movieService.GetMovieDetail(movieId);
+        await emailService.ShareMovie(to, movie);
+        return Ok(new
+        {
+            status = 200,
+            detail = $"Movie has been shared to {to}"
+        });
+    }
+
+    [HttpPost("Trending")]
+    public async Task<IActionResult> AddTrending(string title, string description, string imageUrl, int? currentPage = 1)
+    {
+        var image_data = await movieService.FetchImageAsync(imageUrl);
+        var createMovieDTO = new CreateMovieDTO() { Title = title, Description = description, ImageData = image_data };
+        var movie = await movieService.CreateMovieAsync(createMovieDTO);
+        return Ok(movie);
     }
 }
 

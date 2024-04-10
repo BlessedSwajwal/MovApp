@@ -12,9 +12,9 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<IReadOnlyList<Movie>> GetAllAsync()
+    public async Task<IReadOnlyList<Movie>> GetMovies(int page = 0)
     {
-        var movies = await dbContext.Movies.ToListAsync();
+        var movies = await dbContext.Movies.OrderByDescending(m => m.TotalRates).Skip(page * 10).Take(10).ToListAsync();
         return movies.AsReadOnly();
     }
 
