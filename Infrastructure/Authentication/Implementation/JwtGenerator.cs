@@ -15,7 +15,13 @@ public sealed class JwtGenerator : IJwtGenerator
     {
         _jwtSettings = jwtSettings.Value;
     }
-    public string GenerateJwt(ApplicationUser User, string role)
+
+    /// <summary>
+    /// Generates a JWT token for the user.
+    /// </summary>
+    /// <param name="User">The user for whom token is to be generated.</param>
+    /// <returns></returns>
+    public string GenerateJwt(ApplicationUser User)
     {
         SigningCredentials signingCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey)), SecurityAlgorithms.HmacSha256);
 

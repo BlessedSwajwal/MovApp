@@ -1,26 +1,24 @@
 ﻿using Infrastructure.Data;
-using Infrastructure.Persistence;
-using Infrastructure.Repositories.Interfaces;
+using Infrastructure.Persistence.Repositories.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 
-namespace Infrastructure.Repositories.SQLImplementation;
+namespace Infrastructure.Persistence.Repositories.Implementation.SQLRepository;
 public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieRepository
 {
-    public async Task AddComment(Comment comment)
-    {
-        await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC AddComments {comment.Id}, {comment.CommenterId}, {comment.MovieId}, {comment.CommenterName}, {comment.Description}");
-    }
+    //public async Task AddComment(Comment comment)
+    //{
+    //    await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC AddComments {comment.Id}, {comment.CommenterId}, {comment.MovieId}, {comment.CommenterName}, {comment.Description}");
+    //}
 
-    public async Task AddRating(Movie movie, string userId, int Rating)
-    {
-        movie.Rating += Rating;
-        movie.TotalRates++;
-        await Update(movie);
+    //public async Task AddRating(Movie movie, string userId, int Rating)
+    //{
+    //    movie.Rating += Rating;
+    //    movie.TotalRates++;
+    //    await Update(movie);
 
-        await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC AddRating {Guid.NewGuid()}, {movie.Id}, {userId}, {Rating}");
-    }
+    //    await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC AddRating {Guid.NewGuid()}, {movie.Id}, {userId}, {Rating}");
+    //}
 
     public Task Create(Movie movie)
     {
@@ -35,10 +33,6 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
                 {movie.ReleaseDate}");
     }
 
-    public Task Delete(Guid movieId)
-    {
-        throw new NotImplementedException();
-    }
 
     public async Task DeleteMovie(Guid movieId)
     {
@@ -79,26 +73,26 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
         return movie;
     }
 
-    public async Task<bool> HasUserRatedMovie(Guid movieId, string userId)
-    {
-        // Define output parameter
-        var hasRatedParam = new SqlParameter("@HasRated", SqlDbType.Bit)
-        {
-            Direction = ParameterDirection.Output
-        };
+    //public async Task<bool> HasUserRatedMovie(Guid movieId, string userId)
+    //{
+    //    // Define output parameter
+    //    var hasRatedParam = new SqlParameter("@HasRated", SqlDbType.Bit)
+    //    {
+    //        Direction = ParameterDirection.Output
+    //    };
 
-        // Execute stored procedure
-        await dbContext.Database.ExecuteSqlRawAsync(
-            "EXEC CheckUserMovieRating @MovieId, @UserId, @HasRated OUTPUT",
-            new SqlParameter("@MovieId", movieId),
-            new SqlParameter("@UserId", userId),
-            hasRatedParam);
+    //    // Execute stored procedure
+    //    await dbContext.Database.ExecuteSqlRawAsync(
+    //        "EXEC CheckUserMovieRating @MovieId, @UserId, @HasRated OUTPUT",
+    //        new SqlParameter("@MovieId", movieId),
+    //        new SqlParameter("@UserId", userId),
+    //        hasRatedParam);
 
-        // Retrieve value of output parameter
-        bool hasRated = (bool)hasRatedParam.Value;
+    //    // Retrieve value of output parameter
+    //    bool hasRated = (bool)hasRatedParam.Value;
 
-        return hasRated;
-    }
+    //    return hasRated;
+    //}
 
     //public Task Update(Movie movie)
     //{
@@ -112,11 +106,11 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
         $@"EXEC UpdateMovie 
             {movie.Id}, 
             {movie.Name}, 
-            {movie.Description}, 
+            {movie.Description},
+            {movie.ReleaseDate},
             {movie.Rating}, 
             {movie.TotalRates}, 
-            {movie.Image},
-            {movie.ReleaseDate}");
+            {movie.Image}");
     }
 
     public async Task<IReadOnlyList<Movie>> Search(string searchParam)

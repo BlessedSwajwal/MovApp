@@ -19,6 +19,11 @@
         @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "4" })
     </div>
 
+        <div class="form-group p-2 m-2">
+            @Html.LabelFor(m => m.ReleaseDate)
+            <input type="date" name="ReleaseDate" />
+        </div>
+
     <div class="form-group">
         @Html.Label("Image")
         <input type="file" name="imageFile" id="imageFile" class="form-control" />

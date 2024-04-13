@@ -14,4 +14,6 @@ public class CreateMovieDTO
     public DateOnly ReleaseDate { get; set; }
 
     public byte[]? ImageData { get; set; }
+
+    public CreateMovieDTO() { }
 }

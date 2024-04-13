@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Quartz;
 
-namespace Infrastructure.Services.Implementation;
+namespace Infrastructure.Notification;
 public class NotificationJob(IHubContext<NotificationHub> hubContext, ApplicationDbContext dbContext) : IJob
 {
     public async Task Execute(IJobExecutionContext context)

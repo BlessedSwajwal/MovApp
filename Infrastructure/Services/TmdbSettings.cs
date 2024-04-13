@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Data;
+﻿namespace Infrastructure.Services;
 public class TmdbSettings
 {
     public readonly static string SectionName = "TmdbSettings";

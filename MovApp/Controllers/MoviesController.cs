@@ -1,5 +1,6 @@
 ﻿using Infrastructure.DTOs.Movie;
 using Infrastructure.Services.Email;
+using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ using MovApp.Models;
 using System.Security.Claims;
 
 namespace MovApp.Controllers;
-public class MoviesController(IMovieService movieService, IEmailService emailService) : Controller
+public class MoviesController(IMovieService movieService, ICommentService commentService, IRatingService ratingService, IEmailService emailService) : Controller
 {
     public async Task<IActionResult> Index(bool NewMovieCreated = false, bool MovieDeleted = false, int page = 0)
     {
@@ -18,12 +19,6 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
         return View(movies);
     }
 
-    //[Authorize(Policy = "AdminRequirement")]
-    //public async Task<IActionResult> MovieDashboard()
-    //{
-    //    var movies = await movieService.GetAllMovieAsync();
-    //    return View(movies);
-    //}
 
     [Authorize(Policy = "AdminRequirement")]
     public IActionResult Create()
@@ -72,8 +67,9 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     [Authorize(Policy = "AdminRequirement")]
     public async Task<IActionResult> Update(Guid id)
     {
-        var movie = await movieService.GetMovieDetail(id);
-        return View(movie);
+        var movieResult = await movieService.GetMovieDetail(id);
+        if (movieResult.IsT1) return RedirectToAction(nameof(Index));
+        return View(movieResult.AsT0);
     }
 
     [HttpPost]
@@ -99,11 +95,18 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
 
     public async Task<IActionResult> Detail(Guid id)
     {
-        var movieDTO = await movieService.GetMovieDetail(id);
-        var hasRated = await movieService.HasUserAlreadyRated(id, User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var movieResult = await movieService.GetMovieDetail(id);
+
+        if (movieResult.IsT1)
+        {
+            TempData["msg"] = movieResult.AsT1.Message;
+            return RedirectToAction(nameof(Index));
+        }
+
+        var hasRated = await ratingService.HasUserAlreadyRated(id, User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         ViewBag.HasRated = hasRated;
 
-        var movie = new MovieDetailViewModel(User, movieDTO);
+        var movie = new MovieDetailViewModel(User, movieResult.AsT0);
         return View(movie);
     }
 
@@ -114,7 +117,7 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
         string commentText = Request.Form["comment"]!;
         string movieId = Request.Form["movieId"]!;
 
-        await movieService.PostComment(commentText, Guid.Parse(movieId), User.FindFirstValue(ClaimTypes.NameIdentifier)!, User.Identity!.Name!);
+        await commentService.PostComment(commentText, Guid.Parse(movieId), User.FindFirstValue(ClaimTypes.NameIdentifier)!, User.Identity!.Name!);
 
 
         return RedirectToAction(nameof(Detail), new { id = movieId });
@@ -130,16 +133,25 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     [HttpPost]
     public async Task<IActionResult> Rate(Guid movieId, string userId, int rating)
     {
-        var movieDTO = await movieService.GetMovieDetail(movieId);
-        await movieService.AddRating(movieDTO, userId, rating);
+        var movieResult = await movieService.GetMovieDetail(movieId);
+
+        if (movieResult.IsT1) return BadRequest();
+
+        await ratingService.AddRating(movieResult.AsT0, userId, rating);
         return RedirectToAction(nameof(Detail), new { Id = movieId });
     }
 
     [HttpPost]
     public async Task<IActionResult> EmailShare(Guid movieId, string to)
     {
-        var movie = await movieService.GetMovieDetail(movieId);
-        await emailService.ShareMovie(to, movie);
+        var movieResult = await movieService.GetMovieDetail(movieId);
+
+        if (movieResult.IsT1)
+        {
+            return BadRequest();
+        }
+
+        await emailService.ShareMovie(to, movieResult.AsT0);
         return RedirectToAction(nameof(Detail), new { Id = movieId });
     }
 
@@ -151,5 +163,24 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
         var movie = await movieService.CreateMovieAsync(createMovieDTO);
         TempData["msg"] = "Movie added succesfully!";
         return RedirectToAction(nameof(Trending), new { page = currentPage });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Search(string searchText)
+    {
+        var movies = await movieService.Search(searchText);
+        return View(movies);
+    }
+
+    [HttpPost]
+    public IActionResult Search()
+    {
+        var searchText = Request.Form["searchText"];
+        if (string.IsNullOrEmpty(searchText))
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        return RedirectToAction(nameof(Search), new { searchText });
     }
 }

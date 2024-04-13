@@ -4,5 +4,5 @@ namespace Infrastructure.Authentication.Interfaces;
 
 public interface IJwtGenerator
 {
-    string GenerateJwt(ApplicationUser User, string role);
+    string GenerateJwt(ApplicationUser User);
 }

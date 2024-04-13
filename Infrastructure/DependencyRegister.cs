@@ -2,10 +2,12 @@
 using Infrastructure.Authentication.Implementation;
 using Infrastructure.Authentication.Interfaces;
 using Infrastructure.Data;
+using Infrastructure.Notification;
 using Infrastructure.Persistence;
-using Infrastructure.Repositories.Implementation;
-using Infrastructure.Repositories.Interfaces;
-using Infrastructure.Repositories.SQLImplementation;
+using Infrastructure.Persistence.Repositories.Implementation.LINQRepository;
+using Infrastructure.Persistence.Repositories.Implementation.SQLRepository;
+using Infrastructure.Persistence.Repositories.Interfaces;
+using Infrastructure.Services;
 using Infrastructure.Services.Email;
 using Infrastructure.Services.EmailService;
 using Infrastructure.Services.Implementation;
@@ -114,14 +116,20 @@ public static class DependencyRegister
         {
             op.BaseAddress = new Uri("https://api.themoviedb.org");
         });
+        services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<IRatingService, RatingService>();
 
         if (configuration.GetValue<bool>("UseSql"))
         {
             services.AddScoped<IMovieRepository, SQLMovieRepository>();
+            services.AddScoped<ICommentRepository, SQLCommentRepository>();
+            services.AddScoped<IRatingRepository, SQLRatingsRepository>();
         }
         else
         {
             services.AddScoped<IMovieRepository, MovieRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
+            services.AddScoped<IRatingRepository, RatingRepository>();
         }
 
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();

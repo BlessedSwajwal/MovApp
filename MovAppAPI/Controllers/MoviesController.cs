@@ -1,10 +1,10 @@
-﻿using Infrastructure.Data;
-using Infrastructure.DTOs.Movie;
+﻿using Infrastructure.DTOs.Movie;
 using Infrastructure.Services.Email;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MovAppAPI.RequestContract;
 using System.Security.Claims;
 
 namespace MovAppAPI.Controllers;
@@ -12,20 +12,24 @@ namespace MovAppAPI.Controllers;
 [Route("Movies")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-public class MoviesController(IMovieService movieService, IEmailService emailService) : ControllerBase
+public class MoviesController(IMovieService movieService, ICommentService commentService, IRatingService ratingService, IEmailService emailService) : ControllerBase
 {
 
     [HttpGet]
     public async Task<IActionResult> All(int page = 0)
     {
-        ClaimsPrincipal user = User;
         var movies = await movieService.GetMovies(page);
         return Ok(movies);
     }
 
     [HttpPost("Create")]
+    [Authorize("AdminRequirement")]
     public async Task<ActionResult> Create([FromForm] CreateMovieFromAPI createMovie)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         byte[] image_data;
         if (createMovie.imageFile != null && createMovie.imageFile.Length > 0)
         {
@@ -50,6 +54,7 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
 
 
     [HttpGet("Delete")]
+    [Authorize("AdminRequirement")]
     public async Task<IActionResult> Delete([FromQuery] Guid id)
     {
         await movieService.DeleteMovie(id);
@@ -60,15 +65,21 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     public async Task<IActionResult> Detail([FromQuery] Guid id)
     {
         var movieDTO = await movieService.GetMovieDetail(id);
-        var hasRated = await movieService.HasUserAlreadyRated(id, User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var hasRated = await ratingService.HasUserAlreadyRated(id, User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         var movie = new { hasRated = hasRated, movie = movieDTO };
         return Ok(movie);
     }
 
     [HttpPost("Update")]
+    [Authorize("AdminRequirement")]
     public async Task<IActionResult> Update(UpdateNameAndDesc updatedMovie)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var movieDetail = new MovieDetailDTO()
         {
             Id = updatedMovie.movieId,
@@ -86,13 +97,18 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     [HttpPost("Comment")]
     public async Task<IActionResult> SubmitComment([FromBody] CommentModel commentModel)
     {
-        ClaimsPrincipal user = User;
-        await movieService.PostComment(commentModel.commentText, commentModel.movieId, User.FindFirstValue(ClaimTypes.NameIdentifier)!, User.Identity!.Name!);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        await commentService.PostComment(commentModel.commentText, commentModel.movieId, User.FindFirstValue(ClaimTypes.NameIdentifier)!, User.Identity!.Name!);
 
         return Ok(new { commentModel.commentText, commentModel.movieId });
     }
 
     [HttpGet("Trending")]
+    [Authorize("AdminRequirement")]
     public async Task<IActionResult> Trending([FromQuery] int page = 1)
     {
         var movies = await movieService.GetTrendingMovies(page);
@@ -103,16 +119,27 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     public async Task<IActionResult> Rate([FromQuery] Guid movieId, [FromQuery] int rating)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var movieDTO = await movieService.GetMovieDetail(movieId);
-        await movieService.AddRating(movieDTO, userId, rating);
-        return Ok(new { movieDTO, rated = rating });
+        var movieResult = await movieService.GetMovieDetail(movieId);
+
+        if (movieResult.IsT1) return RedirectToAction(nameof(Index));
+
+        await ratingService.AddRating(movieResult.AsT0, userId, rating);
+        return Ok(new { movieResult, rated = rating });
     }
 
     [HttpPost("Share")]
     public async Task<IActionResult> EmailShare(EmailShareRequest emailShareRequest)
     {
-        var movie = await movieService.GetMovieDetail(emailShareRequest.movieId);
-        await emailService.ShareMovie(emailShareRequest.to, movie);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var movieResult = await movieService.GetMovieDetail(emailShareRequest.movieId);
+
+        if (movieResult.IsT1) return BadRequest(movieResult);
+
+        await emailService.ShareMovie(emailShareRequest.to, movieResult.AsT0);
         return Ok(new
         {
             status = 200,
@@ -121,6 +148,7 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     }
 
     [HttpPost("Trending")]
+    [Authorize("AdminRequirement")]
     public async Task<IActionResult> AddTrending(string title, string description, DateOnly releaseDate, string imageUrl, int? currentPage = 1)
     {
         var image_data = await movieService.FetchImageAsync(imageUrl);
@@ -137,9 +165,3 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     }
 }
 
-public record UpdateMovie(Guid movieId, string name, string description);
-public record CommentModel(Guid movieId, string commentText);
-public record UpdateNameAndDesc(Guid movieId, string title, string description, List<Comment> comments, int rating, int totalRates, byte[] image_data);
-public record EmailShareRequest(Guid movieId, string to);
-
-public record CreateMovieFromAPI(string title, string description, DateOnly ReleaseDate, IFormFile imageFile);

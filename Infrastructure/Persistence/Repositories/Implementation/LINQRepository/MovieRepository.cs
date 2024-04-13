@@ -1,9 +1,8 @@
 ﻿using Infrastructure.Data;
-using Infrastructure.Persistence;
-using Infrastructure.Repositories.Interfaces;
+using Infrastructure.Persistence.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Repositories.Implementation;
+namespace Infrastructure.Persistence.Repositories.Implementation.LINQRepository;
 public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
 {
     public async Task Create(Movie movie)
@@ -24,10 +23,6 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         return comments.AsReadOnly();
     }
 
-    public async Task<Comment?> GetCommentById(Guid id)
-    {
-        return await dbContext.Comments.SingleOrDefaultAsync(c => c.Id == id);
-    }
 
     public async Task<Movie> GetMovieDetail(Guid movieId)
     {
@@ -80,7 +75,7 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
     public async Task<bool> HasUserRatedMovie(Guid movieId, string userId)
     {
         await Task.CompletedTask;
-        return dbContext.Ratings.Any(rt => (rt.RatersId == userId && rt.MovieId == movieId));
+        return dbContext.Ratings.Any(rt => rt.RatersId == userId && rt.MovieId == movieId);
     }
 
     public async Task<IReadOnlyList<Movie>> Search(string searchParam)

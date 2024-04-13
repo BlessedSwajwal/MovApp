@@ -1,23 +1,28 @@
-﻿using Infrastructure.Data;
+﻿using Infrastructure.Common;
+using Infrastructure.Data;
 using Infrastructure.DTOs.Movie;
-using Infrastructure.Repositories.Interfaces;
+using Infrastructure.Persistence.Repositories.Interfaces;
 using Infrastructure.Services.Interfaces;
 using Mapster;
 using Microsoft.Extensions.Options;
+using OneOf;
+using System.Net;
 using System.Text.Json;
 
 namespace Infrastructure.Services.Implementation;
-public class MovieService : IMovieService
+public partial class MovieService : IMovieService
 {
     private readonly IMovieRepository _movieRepository;
+    private readonly ICommentRepository _commentRepository;
     private readonly HttpClient _httpClient;
     private readonly TmdbSettings _settings;
 
-    public MovieService(IMovieRepository movieRepository, HttpClient httpClient, IOptions<TmdbSettings> settings)
+    public MovieService(IMovieRepository movieRepository, HttpClient httpClient, IOptions<TmdbSettings> settings, ICommentRepository commentRepository)
     {
         _movieRepository = movieRepository;
         _httpClient = httpClient;
         _settings = settings.Value;
+        _commentRepository = commentRepository;
     }
 
     public async Task<Movie> CreateMovieAsync(CreateMovieDTO createMovieDTO)
@@ -35,19 +40,18 @@ public class MovieService : IMovieService
         return movieDTOs.AsReadOnly();
     }
 
-    public async Task<MovieDetailDTO> GetMovieDetail(Guid movieId)
+    public async Task<OneOf<MovieDetailDTO, CustomError>> GetMovieDetail(Guid movieId)
     {
         var movie = await _movieRepository.GetMovieDetail(movieId);
-        var comments = await _movieRepository.GetCommentsForAMovie(movieId);
+
+        if (movie is null)
+        {
+            return new CustomError((int)HttpStatusCode.NotFound, $"The movie with id: {movieId} does not exist");
+        }
+
+        var comments = await _commentRepository.GetCommentsForAMovie(movieId);
         var result = movie.BuildAdapter().AddParameters("Comments", comments).AdaptToType<MovieDetailDTO>();
         return result;
-    }
-
-    public async Task PostComment(string commentText, Guid movieId, string commenterId, string commenterName)
-    {
-        var comment = new Comment(Guid.NewGuid(), commentText, movieId, commenterId, commenterName);
-        await _movieRepository.AddComment(comment);
-        //await movieRepository.SaveAsync();
     }
 
     public async Task DeleteMovie(Guid movieId)
@@ -91,19 +95,6 @@ public class MovieService : IMovieService
         var commentIds = updatedMovie.Comments.Select(c => c.Id).ToList();
         var movie = Movie.Create(updatedMovie.Id, updatedMovie.Name, updatedMovie.Description, updatedMovie.Image, updatedMovie.Rating, updatedMovie.TotalRates, commentIds, updatedMovie.ReleaseDate);
         await _movieRepository.Update(movie);
-    }
-
-
-    public async Task AddRating(MovieDetailDTO movieDto, string userId, int Rating)
-    {
-        var movie = Movie.Create(movieDto.Id, movieDto.Name, movieDto.Description, movieDto.Image, movieDto.Rating, movieDto.TotalRates, new List<Guid>(), movieDto.ReleaseDate);
-        await _movieRepository.AddRating(movie, userId, Rating);
-    }
-
-    public async Task<bool> HasUserAlreadyRated(Guid movieId, string userId)
-    {
-        var hasRated = await _movieRepository.HasUserRatedMovie(movieId, userId);
-        return hasRated;
     }
 
     public async Task<byte[]> FetchImageAsync(string imageUrl)

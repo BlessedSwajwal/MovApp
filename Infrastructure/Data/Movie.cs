@@ -49,40 +49,7 @@ public sealed class Movie
 #pragma warning restore CS8618
 }
 
-public class Comment
-{
-    public Guid Id { get; set; }
-    public string CommenterId { get; set; }
-    public string CommenterName { get; set; }
-    public Guid MovieId { get; set; }
-    public string Description { get; set; }
-    public Comment(Guid id, string description, Guid movieId, string commenterId, string commenterName)
-    {
-        Id = id;
-        Description = description;
-        MovieId = movieId;
-        CommenterId = commenterId;
-        CommenterName = commenterName;
-    }
 
-#pragma warning disable CS8618
-    private Comment() { }
-#pragma warning restore CS8618
-}
 
-public class Ratings
-{
-    public Guid Id;
-    public Guid MovieId { get; set; }
-    public string RatersId { get; set; }
-    public int Rating { get; set; }
 
-    public Ratings(Guid movieId, string ratersId, int rating)
-    {
-        Id = Guid.NewGuid();
-        RatersId = ratersId;
-        Rating = rating;
-        MovieId = movieId;
-    }
-}
 
