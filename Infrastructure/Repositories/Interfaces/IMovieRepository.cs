@@ -13,4 +13,5 @@ public interface IMovieRepository
     Task<Movie> GetMovieDetail(Guid movieId);
     Task<bool> HasUserRatedMovie(Guid movieId, string userId);
     Task Update(Movie movie);
+    Task<IReadOnlyList<Movie>> Search(string searchParam);
 }

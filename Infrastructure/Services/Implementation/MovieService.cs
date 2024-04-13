@@ -22,7 +22,7 @@ public class MovieService : IMovieService
 
     public async Task<Movie> CreateMovieAsync(CreateMovieDTO createMovieDTO)
     {
-        var movie = Movie.CreateNew(createMovieDTO.Title, createMovieDTO.Description, createMovieDTO.ImageData);
+        var movie = Movie.CreateNew(createMovieDTO.Title, createMovieDTO.Description, createMovieDTO.ImageData, createMovieDTO.ReleaseDate);
 
         await _movieRepository.Create(movie);
         return movie;
@@ -89,14 +89,14 @@ public class MovieService : IMovieService
     public async Task Update(MovieDetailDTO updatedMovie)
     {
         var commentIds = updatedMovie.Comments.Select(c => c.Id).ToList();
-        var movie = Movie.Create(updatedMovie.Id, updatedMovie.Name, updatedMovie.Description, updatedMovie.Image, updatedMovie.Rating, updatedMovie.TotalRates, commentIds);
+        var movie = Movie.Create(updatedMovie.Id, updatedMovie.Name, updatedMovie.Description, updatedMovie.Image, updatedMovie.Rating, updatedMovie.TotalRates, commentIds, updatedMovie.ReleaseDate);
         await _movieRepository.Update(movie);
     }
 
 
     public async Task AddRating(MovieDetailDTO movieDto, string userId, int Rating)
     {
-        var movie = Movie.Create(movieDto.Id, movieDto.Name, movieDto.Description, movieDto.Image, movieDto.Rating, movieDto.TotalRates, new List<Guid>());
+        var movie = Movie.Create(movieDto.Id, movieDto.Name, movieDto.Description, movieDto.Image, movieDto.Rating, movieDto.TotalRates, new List<Guid>(), movieDto.ReleaseDate);
         await _movieRepository.AddRating(movie, userId, Rating);
     }
 
@@ -113,4 +113,10 @@ public class MovieService : IMovieService
         return imageBytes;
     }
 
+    public async Task<IReadOnlyList<MovieListDTO>> Search(string searchParam)
+    {
+        var movies = await _movieRepository.Search(searchParam);
+        var movieDTOs = movies.Adapt<List<MovieListDTO>>();
+        return movieDTOs.AsReadOnly();
+    }
 }

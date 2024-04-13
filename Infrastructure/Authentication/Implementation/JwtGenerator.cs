@@ -33,7 +33,7 @@ public sealed class JwtGenerator : IJwtGenerator
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(_jwtSettings.ExpiresIn),
+            expires: DateTime.UtcNow.AddDays(30),
             signingCredentials: signingCredentials);
 
         return new JwtSecurityTokenHandler().WriteToken(jwt);

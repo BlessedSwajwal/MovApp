@@ -14,4 +14,5 @@ public interface IMovieService
     Task<bool> HasUserAlreadyRated(Guid movieId, string userId);
     Task PostComment(string commentText, Guid movieId, string commenterId, string commenterName);
     Task Update(MovieDetailDTO updatedMovie);
+    Task<IReadOnlyList<MovieListDTO>> Search(string searchParam);
 }

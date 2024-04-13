@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovApp", "MovApp\MovApp.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{27A9999D-4FB0-47D1-93AE-B90B463B9794}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovAppAPI", "MovAppAPI\MovAppAPI.csproj", "{34E9F861-B71C-42C1-A603-B61FDADC15E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovAppAPI", "MovAppAPI\MovAppAPI.csproj", "{34E9F861-B71C-42C1-A603-B61FDADC15E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -82,4 +82,10 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         await Task.CompletedTask;
         return dbContext.Ratings.Any(rt => (rt.RatersId == userId && rt.MovieId == movieId));
     }
+
+    public async Task<IReadOnlyList<Movie>> Search(string searchParam)
+    {
+        var movies = await dbContext.Movies.Where(m => m.Name.ToLower().Contains(searchParam.ToLower())).ToListAsync();
+        return movies;
+    }
 }

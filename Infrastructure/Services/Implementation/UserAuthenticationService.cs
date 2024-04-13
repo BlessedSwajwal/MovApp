@@ -2,6 +2,7 @@
 using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.DTOs;
+using Infrastructure.Persistence;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using OneOf;
@@ -12,16 +13,18 @@ using System.Security.Claims;
 namespace Infrastructure.Services.Implementation;
 public class UserAuthenticationService : IUserAuthenticationService
 {
+    private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> userManager;
     private readonly SignInManager<ApplicationUser> signInManager;
     private readonly IJwtGenerator _jwtGenerator;
 
-    public UserAuthenticationService(UserManager<ApplicationUser> userManager, IJwtGenerator jwtGenerator, SignInManager<ApplicationUser> signInManager)
+    public UserAuthenticationService(UserManager<ApplicationUser> userManager, IJwtGenerator jwtGenerator, SignInManager<ApplicationUser> signInManager, ApplicationDbContext context)
     {
         this.userManager = userManager;
         _jwtGenerator = jwtGenerator;
 
         this.signInManager = signInManager;
+        _context = context;
     }
 
     public async Task<OneOf<AuthResponse, CustomError>> LoginAsync(LoginModel model)

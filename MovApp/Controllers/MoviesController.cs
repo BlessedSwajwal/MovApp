@@ -144,10 +144,10 @@ public class MoviesController(IMovieService movieService, IEmailService emailSer
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddTrending(string title, string description, string imageUrl, int? currentPage = 1)
+    public async Task<IActionResult> AddTrending(string title, string description, DateOnly releaseDate, string imageUrl, int? currentPage = 1)
     {
         var image_data = await movieService.FetchImageAsync(imageUrl);
-        var createMovieDTO = new CreateMovieDTO() { Title = title, Description = description, ImageData = image_data };
+        var createMovieDTO = new CreateMovieDTO(title, description, releaseDate, image_data);
         var movie = await movieService.CreateMovieAsync(createMovieDTO);
         TempData["msg"] = "Movie added succesfully!";
         return RedirectToAction(nameof(Trending), new { page = currentPage });

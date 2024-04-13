@@ -31,7 +31,8 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
                 {movie.Description}, 
                 {movie.Rating}, 
                 {movie.TotalRates}, 
-                {movie.Image}");
+                {movie.Image},
+                {movie.ReleaseDate}");
     }
 
     public Task Delete(Guid movieId)
@@ -46,8 +47,8 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
 
     public async Task<IReadOnlyList<Movie>> GetMovies(int page = 1)
     {
-        var movies = await dbContext.Movies.FromSqlRaw("EXEC GetAllMovies").ToListAsync();
-
+        var movies = await dbContext.Movies.FromSqlRaw("EXEC GetPagedMoviesByRating @PageNumber, @PageSize", new SqlParameter("@PageNumber", page), new SqlParameter("@PageSize", 10)).ToListAsync();
+        Console.WriteLine(movies);
         return movies;
     }
 
@@ -114,6 +115,13 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
             {movie.Description}, 
             {movie.Rating}, 
             {movie.TotalRates}, 
-            {movie.Image}");
+            {movie.Image},
+            {movie.ReleaseDate}");
+    }
+
+    public async Task<IReadOnlyList<Movie>> Search(string searchParam)
+    {
+        var results = await dbContext.Movies.FromSqlInterpolated($"EXEC SearchMovies {searchParam}").ToListAsync();
+        return results;
     }
 }

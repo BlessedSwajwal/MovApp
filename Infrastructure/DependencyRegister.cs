@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Quartz;
 using System.Security.Claims;
 using System.Text;
 
@@ -26,6 +27,8 @@ public static class DependencyRegister
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+
+
         var conn_string = configuration.GetConnectionString("MovApp");
 
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(conn_string));
@@ -40,6 +43,24 @@ public static class DependencyRegister
         var tmdbSettings = new TmdbSettings();
         configuration.GetSection(TmdbSettings.SectionName).Bind(tmdbSettings);
         services.AddSingleton(Options.Create<TmdbSettings>(tmdbSettings));
+
+        services.AddSignalR();
+        //services.AddScoped<IHubContext<NotificationJob>>();
+
+        services.AddQuartz(options =>
+        {
+            options.AddJob<NotificationJob>(JobKey.Create(nameof(NotificationJob)))
+            .AddTrigger(trigger =>
+            {
+                trigger
+                    .ForJob(JobKey.Create(nameof(NotificationJob)))
+                    .StartNow()
+                    .WithSimpleSchedule(s => s.WithIntervalInSeconds(30).RepeatForever());
+            });
+        });
+
+
+        services.AddQuartzHostedService();
 
         return services;
     }

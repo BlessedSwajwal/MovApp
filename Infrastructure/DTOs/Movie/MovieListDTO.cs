@@ -6,5 +6,6 @@ public class MovieListDTO
     public string Description { get; set; }
     public int Rating { get; set; }
     public int TotalRates { get; set; }
+    public DateOnly ReleaseDate { get; set; }
     public byte[] Image { get; set; }
 }
