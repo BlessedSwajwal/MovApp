@@ -51,8 +51,8 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
         return results;
     }
 
-    public Task UpdateNameAndDesc(Guid id, string name, string desc, DateOnly releaseDate)
+    public async Task UpdateNameAndDesc(Guid id, string name, string desc, DateOnly releaseDate)
     {
-        throw new NotImplementedException();
+        await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC UpdateMovieDetails {id}, {name}, {desc}, {releaseDate}");
     }
 }

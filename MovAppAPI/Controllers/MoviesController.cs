@@ -38,7 +38,7 @@ public class MoviesController(IMovieService movieService, ICommentService commen
     }
 
 
-    [HttpGet("Delete")]
+    [HttpDelete("Delete")]
     [Authorize("AdminRequirement")]
     public async Task<IActionResult> Delete([FromQuery] Guid id)
     {
@@ -64,9 +64,9 @@ public class MoviesController(IMovieService movieService, ICommentService commen
         return Ok(movie);
     }
 
-    [HttpPost("Update")]
+    [HttpPut("Update")]
     [Authorize("AdminRequirement")]
-    public async Task<IActionResult> Update(UpdateMovieDetailsDTO updatedMovie)
+    public async Task<IActionResult> Update([FromForm] UpdateMovieDetailsDTO updatedMovie)
     {
         if (!ModelState.IsValid)
         {
