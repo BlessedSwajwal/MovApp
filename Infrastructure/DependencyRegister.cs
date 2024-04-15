@@ -57,7 +57,7 @@ public static class DependencyRegister
                 trigger
                     .ForJob(JobKey.Create(nameof(NotificationJob)))
                     .StartNow()
-                    .WithSimpleSchedule(s => s.WithIntervalInSeconds(30).RepeatForever());
+                    .WithSimpleSchedule(s => s.WithIntervalInSeconds(10).RepeatForever());
             });
         });
 

@@ -25,6 +25,12 @@ public class UserAuthenticationController(IUserAuthenticationService _authServic
         return View();
     }
 
+    public async Task<IActionResult> Logout()
+    {
+        await _authService.LogoutAsync();
+        return RedirectToAction(nameof(Login));
+    }
+
     [HttpPost("/Account/Login")]
     public async Task<IActionResult> Login(LoginModel model)
     {

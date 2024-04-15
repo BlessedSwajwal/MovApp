@@ -1,6 +1,6 @@
-﻿using Infrastructure.DTOs.Movie;
+﻿using Infrastructure;
+using Infrastructure.DTOs.Movie;
 using Infrastructure.Services.Email;
-using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -120,6 +120,7 @@ public class MoviesController(IMovieService movieService, ICommentService commen
     [HttpPost]
     public async Task<IActionResult> Rate(Guid movieId, string userId, int rating)
     {
+        if (rating < 0 || rating > 10) return Problem(statusCode: 400, detail: "Rating must be between 0 and 10");
         var movieResult = await movieService.GetMovieDetail(movieId);
 
         if (movieResult.IsT1) return BadRequest();
@@ -169,5 +170,31 @@ public class MoviesController(IMovieService movieService, ICommentService commen
         }
 
         return RedirectToAction(nameof(Search), new { searchText });
+    }
+
+    [HttpGet]
+    [Route("/notifications")]
+    public IActionResult Notification()
+    {
+        var notificationMovies = Notifications.NotificationsMovies;
+        return View(notificationMovies);
+    }
+
+    public IActionResult UpdateImage([FromQuery] Guid movieId)
+    {
+        ViewBag.MovieId = movieId;
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateImage([FromForm] UpdateImageDTO updateImageDTO)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        await movieService.UpdateImage(updateImageDTO);
+        return RedirectToAction(nameof(Detail), new { id = updateImageDTO.movieId });
     }
 }

@@ -54,11 +54,21 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         await dbContext.SaveChangesAsync();
     }
 
-
-
     public async Task<IReadOnlyList<Movie>> Search(string searchParam)
     {
         var movies = await dbContext.Movies.Where(m => m.Name.ToLower().Contains(searchParam.ToLower())).ToListAsync();
         return movies;
+    }
+
+    public async Task UpdateImage(Guid movieId, string imagePath)
+    {
+        var movieToUpdate = new Movie { Id = movieId, ImagePath = imagePath };
+        // Attach the entity with modified properties
+        dbContext.Attach(movieToUpdate);
+
+        // Explicitly mark the properties as modified
+        dbContext.Entry(movieToUpdate).Property(p => p.ImagePath).IsModified = true;
+
+        await dbContext.SaveChangesAsync();
     }
 }

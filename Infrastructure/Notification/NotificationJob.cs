@@ -8,7 +8,8 @@ public class NotificationJob(IHubContext<NotificationHub> hubContext, Applicatio
     public async Task Execute(IJobExecutionContext context)
     {
         await Console.Out.WriteLineAsync("Firing the job");
-        var movies = dbContext.Movies.Take(3).ToList();
+        var movies = dbContext.Movies.Where(m => m.ReleaseDate > DateOnly.FromDateTime(DateTime.Now)).Take(3).ToList();
+        Notifications.NotificationsMovies = movies;
         await hubContext.Clients.All.SendAsync("ReceiveNotification", movies);
     }
 }

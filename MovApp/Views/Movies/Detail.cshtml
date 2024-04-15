@@ -24,6 +24,7 @@
                     <a class="btn btn-danger" href="@Url.Action($"Delete", "Movies", new { id = movie.Id })">Delete</a>
 
                     <a class="btn btn-primary" href="@Url.Action($"Update", "Movies", new { id = movie.Id })">Edit</a>
+                    <a class="btn btn-primary" href="@Url.Action($"UpdateImage", "Movies", new { movieId = movie.Id })">Update Image</a>
 
                 </div>
             }

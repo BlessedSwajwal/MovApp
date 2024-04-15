@@ -1,0 +1,18 @@
+﻿@using Infrastructure.Data
+@model List<Movie>
+@{
+  
+}
+
+
+
+<h1 class="text-5xl font-extrabold dark:text-white">Notifications</h1>
+
+
+<ul class="w-full mt-3 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+    @foreach(var movie in Model) {
+        <li class="text-2xl w-full px-4 py-2 border-b border-gray-200 rounded-t-lg dark:border-gray-600">@movie.Name is releasing on @movie.ReleaseDate</li>
+    }
+</ul>
+
+

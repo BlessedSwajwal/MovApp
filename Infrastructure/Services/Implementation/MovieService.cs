@@ -110,5 +110,11 @@ public partial class MovieService : IMovieService
         var movieDTOs = movies.Adapt<List<MovieListDTO>>();
         return movieDTOs.AsReadOnly();
     }
+
+    public async Task UpdateImage(UpdateImageDTO updateImageDTO)
+    {
+        var fileName = await SharedFile.SaveFile(updateImageDTO.ImageFile);
+        await _movieRepository.UpdateImage(updateImageDTO.movieId, fileName);
+    }
 }
 

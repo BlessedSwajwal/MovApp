@@ -15,4 +15,5 @@ public interface IMovieRepository
     //Task Update(Movie movie);
     Task<IReadOnlyList<Movie>> Search(string searchParam);
     Task UpdateNameAndDesc(Guid id, string name, string desc, DateOnly releaseDate);
+    Task UpdateImage(Guid movieId, string imagePath);
 }

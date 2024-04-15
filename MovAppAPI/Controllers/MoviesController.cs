@@ -101,6 +101,7 @@ public class MoviesController(IMovieService movieService, ICommentService commen
     [HttpGet("Rate")]
     public async Task<IActionResult> Rate([FromQuery] Guid movieId, [FromQuery] int rating)
     {
+        if (rating < 0 || rating > 10) return Problem(statusCode: 400, detail: "Rating must be between 0 and 10");
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var movieResult = await movieService.GetMovieDetail(movieId);
 
@@ -130,15 +131,17 @@ public class MoviesController(IMovieService movieService, ICommentService commen
         });
     }
 
-    //[HttpPost("Trending")]
-    //[Authorize("AdminRequirement")]
-    //public async Task<IActionResult> AddTrending(string title, string description, DateOnly releaseDate, string imageUrl, int? currentPage = 1)
-    //{
-    //    var image_data = await movieService.FetchImageAsync(imageUrl);
-    //    var createMovieDTO = new CreateMovieDTO(title, description, releaseDate, image_data);
-    //    var movie = await movieService.CreateMovieAsync(createMovieDTO);
-    //    return Ok(movie);
-    //}
+    [HttpPut("UpdateImage")]
+    public async Task<IActionResult> UpdateImage([FromForm] UpdateImageDTO updateImageDTO)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        await movieService.UpdateImage(updateImageDTO);
+        return Ok();
+    }
 
     [HttpGet("Search")]
     public async Task<IActionResult> SearchByName([FromQuery] string searchQuery)

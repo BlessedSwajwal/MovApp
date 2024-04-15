@@ -91,38 +91,6 @@
         </div>
         }
    
-
-    @* <table>
-        <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Rating</th>
-            <th>Total Rates</th>
-            <th>Image</th>
-            <th>Actions</th>
-        </tr>
-        
-        @foreach (var movie in Model)
-        {
-            <tr>
-                <td>@movie.Name</td>
-                <td>@movie.Description</td>
-                <td>@movie.Rating</td>
-                <td>@movie.TotalRates</td>
-                <td><img src="data:image;base64,@Convert.ToBase64String(movie.Image)" /></td>
-                <td>
-                    <a class="button" href="@Url.Action("Detail", "Movies", new { id = movie.Id })">Details</a>
-                    @if (User.FindFirst(ClaimTypes.Email)!.Value.Equals("admin@admin.com", StringComparison.OrdinalIgnoreCase))
-                    {
-                        <a class="button" href="@Url.Action($"Delete", "Movies", new { id = movie.Id })">Delete</a>
-                        <br />
-                    }
-                </td>
-                
-            </tr>
-
-        }
-    </table> *@
     
     <div class="container mt-3">
         <!-- Bootstrap alert message -->

@@ -56,10 +56,9 @@ public class UserAuthenticationService : IUserAuthenticationService
     }
 
 
-    public Task LogoutAsync()
+    public async Task LogoutAsync()
     {
-
-        throw new NotImplementedException();
+        await signInManager.SignOutAsync();
     }
 
     public async Task<ApplicationUser> GetAdmin()

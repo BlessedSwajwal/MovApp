@@ -1,0 +1,30 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<div>
+    @using (Html.BeginForm("UpdateImage", "Movies", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <input type="text" name="movieId" value="@ViewBag.MovieId" hidden />
+
+        <div class="form-group">
+            @Html.Label("Image")
+            <input type="file" name="ImageFile" id="imageFile" class="form-control" />
+        </div>
+
+        @if (TempData["msg"] != null && ((List<string>)TempData["msg"]!).Any())
+        {
+            foreach (string error in (List<string>)TempData["msg"]!)
+            {
+                <div class="form-group">
+                    <span class="text-info">@error</span>
+                </div>
+            }
+        }
+
+        <button type="submit" class="btn btn-primary mt-3">Update Movie</button>
+
+    }
+</div>

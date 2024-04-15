@@ -19,4 +19,5 @@ public interface IMovieService
 
     Task<IReadOnlyList<MovieListDTO>> Search(string searchParam);
     Task Update(UpdateMovieDetailsDTO updatedMovie);
+    Task UpdateImage(UpdateImageDTO updateImageDTO);
 }

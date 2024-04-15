@@ -55,4 +55,9 @@ public class SQLMovieRepository(ApplicationDbContext dbContext) : IMovieReposito
     {
         await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC UpdateMovieDetails {id}, {name}, {desc}, {releaseDate}");
     }
+
+    public async Task UpdateImage(Guid movieId, string imagePath)
+    {
+        await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC UpdateMovieImage {movieId}, {imagePath}");
+    }
 }
