@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.DTOs.Movie;
+using Infrastructure.Services.Implementation;
 using OneOf;
 
 namespace Infrastructure.Services.Interfaces;
@@ -15,6 +16,7 @@ public interface IMovieService
     Task<List<TrendingMovieDTO>> GetTrendingMovies(int page);
     //Task<bool> HasUserAlreadyRated(Guid movieId, string userId);
     //Task PostComment(string commentText, Guid movieId, string commenterId, string commenterName);
-    Task Update(MovieDetailDTO updatedMovie);
+
     Task<IReadOnlyList<MovieListDTO>> Search(string searchParam);
+    Task Update(UpdateMovieDetailsDTO updatedMovie);
 }

@@ -1,7 +1,9 @@
 using Infrastructure;
+using Infrastructure.Services.Implementation;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +37,12 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+           SharedFile.GetSharedFolderPath()),
+    RequestPath = "/Images"
+});
 
 app.UseRouting();
 

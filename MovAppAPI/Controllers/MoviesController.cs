@@ -24,32 +24,17 @@ public class MoviesController(IMovieService movieService, ICommentService commen
 
     [HttpPost("Create")]
     [Authorize("AdminRequirement")]
-    public async Task<ActionResult> Create([FromForm] CreateMovieFromAPI createMovie)
+    public async Task<ActionResult> Create([FromForm] CreateMovieDTO createMovieRequest)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid || createMovieRequest.ImageFile == null || createMovieRequest.ImageFile.Length <= 0)
         {
             return BadRequest(ModelState);
         }
-        byte[] image_data;
-        if (createMovie.imageFile != null && createMovie.imageFile.Length > 0)
-        {
-            using (var memoryStream = new MemoryStream())
-            {
-                await createMovie.imageFile.CopyToAsync(memoryStream);
-                image_data = memoryStream.ToArray();
-            }
 
-            var createMovieDTO = new CreateMovieDTO(createMovie.title, createMovie.description, createMovie.ReleaseDate, image_data);
-            //TODO: Create the movie
-            var movie = await movieService.CreateMovieAsync(createMovieDTO);
+        //TODO: Create the movie
+        var movie = await movieService.CreateMovieAsync(createMovieRequest);
 
-            return Ok(movie);
-        }
-        else
-        {
-            return Problem(title: "Error", detail: "Image error", statusCode: 401);
-        }
-
+        return Ok(movie);
     }
 
 
@@ -64,33 +49,31 @@ public class MoviesController(IMovieService movieService, ICommentService commen
     [HttpGet("Detail")]
     public async Task<IActionResult> Detail([FromQuery] Guid id)
     {
-        var movieDTO = await movieService.GetMovieDetail(id);
+        var movieResult = await movieService.GetMovieDetail(id);
+        if (movieResult.IsT1)
+        {
+            var error = movieResult.AsT1;
+            return Problem(statusCode: error.StatusCode, detail: error.Message);
+        }
+
+        var movieDetail = movieResult.AsT0;
+
         var hasRated = await ratingService.HasUserAlreadyRated(id, User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        var movie = new { hasRated = hasRated, movie = movieDTO };
+        var movie = new { hasRated = hasRated, movie = movieDetail };
         return Ok(movie);
     }
 
     [HttpPost("Update")]
     [Authorize("AdminRequirement")]
-    public async Task<IActionResult> Update(UpdateNameAndDesc updatedMovie)
+    public async Task<IActionResult> Update(UpdateMovieDetailsDTO updatedMovie)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var movieDetail = new MovieDetailDTO()
-        {
-            Id = updatedMovie.movieId,
-            Name = updatedMovie.title,
-            Description = updatedMovie.description,
-            Image = updatedMovie.image_data,
-            Rating = updatedMovie.rating,
-            TotalRates = updatedMovie.totalRates,
-            Comments = updatedMovie.comments,
-        };
-        await movieService.Update(movieDetail);
+        await movieService.Update(updatedMovie);
         return Ok("Updated");
     }
 
@@ -147,15 +130,15 @@ public class MoviesController(IMovieService movieService, ICommentService commen
         });
     }
 
-    [HttpPost("Trending")]
-    [Authorize("AdminRequirement")]
-    public async Task<IActionResult> AddTrending(string title, string description, DateOnly releaseDate, string imageUrl, int? currentPage = 1)
-    {
-        var image_data = await movieService.FetchImageAsync(imageUrl);
-        var createMovieDTO = new CreateMovieDTO(title, description, releaseDate, image_data);
-        var movie = await movieService.CreateMovieAsync(createMovieDTO);
-        return Ok(movie);
-    }
+    //[HttpPost("Trending")]
+    //[Authorize("AdminRequirement")]
+    //public async Task<IActionResult> AddTrending(string title, string description, DateOnly releaseDate, string imageUrl, int? currentPage = 1)
+    //{
+    //    var image_data = await movieService.FetchImageAsync(imageUrl);
+    //    var createMovieDTO = new CreateMovieDTO(title, description, releaseDate, image_data);
+    //    var movie = await movieService.CreateMovieAsync(createMovieDTO);
+    //    return Ok(movie);
+    //}
 
     [HttpGet("Search")]
     public async Task<IActionResult> SearchByName([FromQuery] string searchQuery)

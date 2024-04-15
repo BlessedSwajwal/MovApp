@@ -12,6 +12,7 @@ public interface IMovieRepository
     //public Task<IReadOnlyList<Comment>> GetCommentsForAMovie(Guid movieId);
     Task<Movie> GetMovieDetail(Guid movieId);
     //Task<bool> HasUserRatedMovie(Guid movieId, string userId);
-    Task Update(Movie movie);
+    //Task Update(Movie movie);
     Task<IReadOnlyList<Movie>> Search(string searchParam);
+    Task UpdateNameAndDesc(Guid id, string name, string desc, DateOnly releaseDate);
 }

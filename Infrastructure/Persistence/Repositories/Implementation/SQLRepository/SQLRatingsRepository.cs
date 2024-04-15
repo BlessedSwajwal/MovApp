@@ -11,7 +11,15 @@ public class SQLRatingsRepository(ApplicationDbContext dbContext, IMovieReposito
     {
         movie.Rating += Rating;
         movie.TotalRates++;
-        await movieRepository.Update(movie);
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+        $@"EXEC UpdateMovie 
+            {movie.Id}, 
+            {movie.Name}, 
+            {movie.Description}, 
+            {movie.ReleaseDate},
+            {movie.Rating}, 
+            {movie.TotalRates}, 
+            {movie.ImagePath}");
 
         await dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC AddRating {Guid.NewGuid()}, {movie.Id}, {userId}, {Rating}");
     }

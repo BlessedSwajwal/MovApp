@@ -27,7 +27,9 @@ public partial class MovieService : IMovieService
 
     public async Task<Movie> CreateMovieAsync(CreateMovieDTO createMovieDTO)
     {
-        var movie = Movie.CreateNew(createMovieDTO.Title, createMovieDTO.Description, createMovieDTO.ImageData, createMovieDTO.ReleaseDate);
+        var uniqueFileName = await SharedFile.SaveFile(createMovieDTO.ImageFile);
+
+        var movie = Movie.CreateNew(createMovieDTO.Title, createMovieDTO.Description, uniqueFileName, createMovieDTO.ReleaseDate);
 
         await _movieRepository.Create(movie);
         return movie;
@@ -90,11 +92,9 @@ public partial class MovieService : IMovieService
         return movies;
     }
 
-    public async Task Update(MovieDetailDTO updatedMovie)
+    public async Task Update(UpdateMovieDetailsDTO updatedMovie)
     {
-        var commentIds = updatedMovie.Comments.Select(c => c.Id).ToList();
-        var movie = Movie.Create(updatedMovie.Id, updatedMovie.Name, updatedMovie.Description, updatedMovie.Image, updatedMovie.Rating, updatedMovie.TotalRates, commentIds, updatedMovie.ReleaseDate);
-        await _movieRepository.Update(movie);
+        await _movieRepository.UpdateNameAndDesc(updatedMovie.MovieId, updatedMovie.name, updatedMovie.description, updatedMovie.releaseDate);
     }
 
     public async Task<byte[]> FetchImageAsync(string imageUrl)
@@ -111,3 +111,4 @@ public partial class MovieService : IMovieService
         return movieDTOs.AsReadOnly();
     }
 }
+

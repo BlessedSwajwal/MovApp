@@ -1,7 +1,9 @@
 using Infrastructure;
 using Infrastructure.Notification;
+using Infrastructure.Services.Implementation;
 using Mapster;
 using MapsterMapper;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +75,13 @@ if (app.Environment.IsDevelopment())
 app.UseCors("MyPolicy");
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+           SharedFile.GetSharedFolderPath()),
+    RequestPath = "/Images"
+});
 
 app.UseAuthorization();
 

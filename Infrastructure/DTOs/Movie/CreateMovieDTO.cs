@@ -1,19 +1,21 @@
-﻿namespace Infrastructure.DTOs.Movie;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Infrastructure.DTOs.Movie;
 public class CreateMovieDTO
 {
-    public CreateMovieDTO(string title, string description, DateOnly releaseDate, byte[]? imageData)
+    public CreateMovieDTO(string title, string description, DateOnly releaseDate, IFormFile imageData)
     {
         Title = title;
         Description = description;
         ReleaseDate = releaseDate;
-        ImageData = imageData;
+        ImageFile = imageData;
     }
 
     public string Title { get; set; }
     public string Description { get; set; }
     public DateOnly ReleaseDate { get; set; }
 
-    public byte[]? ImageData { get; set; }
+    public IFormFile ImageFile { get; set; }
 
     public CreateMovieDTO() { }
 }

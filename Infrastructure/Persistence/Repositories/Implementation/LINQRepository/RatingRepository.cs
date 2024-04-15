@@ -15,9 +15,10 @@ public class RatingRepository(ApplicationDbContext dbContext) : IRatingRepositor
             {movie.Id}, 
             {movie.Name}, 
             {movie.Description}, 
+            {movie.ReleaseDate},
             {movie.Rating}, 
             {movie.TotalRates}, 
-            {movie.Image}");
+            {movie.ImagePath}");
         var rating = new Ratings(movie.Id, userId, Rating);
         dbContext.Ratings.Add(rating);
         await dbContext.SaveChangesAsync();

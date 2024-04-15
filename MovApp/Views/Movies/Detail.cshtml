@@ -10,7 +10,7 @@
 
 
     <div class="movie-details">
-        <img class="movie-image" style=" width: 100%; height: 500px; object-fit: cover;" src="data:image/jpeg;base64,@Convert.ToBase64String(movie.Image)" alt="Movie Poster">
+    <img class="movie-image" style=" width: 100%; height: 500px; object-fit: cover;" src="@(AppData.ImageUrl+$"/{movie.ImagePath}")" alt="Movie Poster">
         <div class="movie-info">
             <h1 class="text-center mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-6xl">@movie.Name</h1>
             <p class="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">@movie.Description</p>

@@ -9,6 +9,6 @@ public class MovieDetailDTO
     public DateOnly ReleaseDate { get; set; }
     public int Rating { get; set; }
     public int TotalRates { get; set; }
-    public byte[] Image { get; set; }
+    public string ImagePath { get; set; }
     public List<Comment> Comments { get; set; }
 }

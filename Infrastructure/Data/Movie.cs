@@ -8,16 +8,14 @@ public sealed class Movie
     public int Rating { get; set; }
     public int TotalRates { get; set; }
     public DateOnly ReleaseDate { get; set; }
-    public byte[] Image { get; set; }
+    public string ImagePath { get; set; }
 
-    //private List<Guid> _commentIds = new();
-    //public IReadOnlyList<Guid> CommentIds => _commentIds.AsReadOnly();
 
     private Movie(
         Guid id,
         string name,
         string description,
-        byte[] image,
+        string imagePath,
         int rating,
         int totalRates,
         List<Guid> commentIds,
@@ -26,21 +24,20 @@ public sealed class Movie
         Id = id;
         Name = name;
         Description = description;
-        Image = image;
+        ImagePath = imagePath;
         Rating = rating;
         TotalRates = totalRates;
         ReleaseDate = releaseDate;
     }
 
-    public static Movie CreateNew(string name, string description, byte[] image, DateOnly releaseDate)
+    public static Movie CreateNew(string name, string description, string imagePath, DateOnly releaseDate)
     {
-        return new(Guid.NewGuid(), name, description, image, 0, 0, new List<Guid>(), releaseDate);
-
+        return new(Guid.NewGuid(), name, description, imagePath, 0, 0, new List<Guid>(), releaseDate);
     }
 
-    public static Movie Create(Guid id, string name, string description, byte[] image, int rating, int totalRates, List<Guid> commentIds, DateOnly releaseDate)
+    public static Movie Create(Guid id, string name, string description, string imagePath, int rating, int totalRates, List<Guid> commentIds, DateOnly releaseDate)
     {
-        return new(id, name, description, image, rating, totalRates, commentIds, releaseDate);
+        return new(id, name, description, imagePath, rating, totalRates, commentIds, releaseDate);
 
     }
 

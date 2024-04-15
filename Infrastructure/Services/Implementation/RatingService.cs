@@ -11,7 +11,7 @@ public class RatingService(IRatingRepository _ratingRepository) : IRatingService
 {
     public async Task AddRating(MovieDetailDTO movieDto, string userId, int Rating)
     {
-        var movie = Movie.Create(movieDto.Id, movieDto.Name, movieDto.Description, movieDto.Image, movieDto.Rating, movieDto.TotalRates, new List<Guid>(), movieDto.ReleaseDate);
+        var movie = Movie.Create(movieDto.Id, movieDto.Name, movieDto.Description, movieDto.ImagePath, movieDto.Rating, movieDto.TotalRates, new List<Guid>(), movieDto.ReleaseDate);
         await _ratingRepository.AddRating(movie, userId, Rating);
     }
 

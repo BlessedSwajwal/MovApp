@@ -77,6 +77,7 @@
 
 using Infrastructure.DTOs.Movie;
 using Infrastructure.Services.EmailService;
+using Infrastructure.Services.Implementation;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -108,7 +109,7 @@ public class EmailService : IEmailService
 
         var bodyBuilder = new BodyBuilder();
 
-        var imageStream = new MemoryStream(movie.Image);
+        var imageStream = new MemoryStream(await SharedFile.GetFileByte(movie.ImagePath));
 
         // Create an attachment with Content-ID
         var imageAttachment = new MimePart("image", "jpeg")

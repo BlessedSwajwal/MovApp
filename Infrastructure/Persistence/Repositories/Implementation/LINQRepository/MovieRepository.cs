@@ -17,11 +17,22 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         return movies.AsReadOnly();
     }
 
-    public async Task<IReadOnlyList<Comment>> GetCommentsForAMovie(Guid movieId)
+    public async Task UpdateNameAndDesc(Guid id, string name, string desc, DateOnly releaseDate)
     {
-        var comments = await dbContext.Comments.Where(c => c.MovieId == movieId).ToListAsync();
-        return comments.AsReadOnly();
+        var movieToUpdate = new Movie { Id = id, Name = name, Description = desc, ReleaseDate = releaseDate };
+
+        // Attach the entity with modified properties
+        dbContext.Attach(movieToUpdate);
+
+        // Explicitly mark the properties as modified
+        dbContext.Entry(movieToUpdate).Property(p => p.Name).IsModified = true;
+        dbContext.Entry(movieToUpdate).Property(p => p.Description).IsModified = true;
+        dbContext.Entry(movieToUpdate).Property(p => p.ReleaseDate).IsModified = true;
+
+        // Save changes without full entity retrieval
+        await dbContext.SaveChangesAsync();
     }
+
 
 
     public async Task<Movie> GetMovieDetail(Guid movieId)
@@ -34,11 +45,6 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         return movie;
     }
 
-    public async Task AddComment(Comment comment)
-    {
-        dbContext.Comments.Add(comment);
-        await dbContext.SaveChangesAsync();
-    }
 
     public async Task DeleteMovie(Guid movieId)
     {
@@ -48,35 +54,7 @@ public class MovieRepository(ApplicationDbContext dbContext) : IMovieRepository
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task Update(Movie movie)
-    {
-        dbContext.Update(movie);
-        await dbContext.SaveChangesAsync();
-    }
 
-    public async Task AddRating(Movie movie, string userId, int Rating)
-    {
-        movie.Rating += Rating;
-        movie.TotalRates++;
-        //dbContext.Update(movie);
-        await dbContext.Database.ExecuteSqlInterpolatedAsync(
-        $@"EXEC UpdateMovie 
-            {movie.Id}, 
-            {movie.Name}, 
-            {movie.Description}, 
-            {movie.Rating}, 
-            {movie.TotalRates}, 
-            {movie.Image}");
-        var rating = new Ratings(movie.Id, userId, Rating);
-        dbContext.Ratings.Add(rating);
-        await dbContext.SaveChangesAsync();
-    }
-
-    public async Task<bool> HasUserRatedMovie(Guid movieId, string userId)
-    {
-        await Task.CompletedTask;
-        return dbContext.Ratings.Any(rt => rt.RatersId == userId && rt.MovieId == movieId);
-    }
 
     public async Task<IReadOnlyList<Movie>> Search(string searchParam)
     {

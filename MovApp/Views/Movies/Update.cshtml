@@ -9,8 +9,8 @@
 <div class="w-75 d-flex flex-column align-items-center mt-2">
     @using (Html.BeginForm("Update", "Movies", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
-       @Html.HiddenFor(dto => dto.Image, movie.Image);
-       @Html.HiddenFor(dto => dto.Comments, movie.Comments);
+       <input type="text" name="movieId" value="@movie.Id" hidden />
+       
         <div style="width: 500px;" class="form-group">
             @Html.LabelFor(m => m.Name)
             @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
@@ -21,10 +21,10 @@
             @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "4" })
         </div>
 
-        <div class="form-group">
-            @Html.Label("Image")
-            <input type="file" name="imageFile" id="imageFile" class="form-control" />
-        </div>
+            <div class="form-group p-2 m-2">
+                @Html.LabelFor(m => m.ReleaseDate)
+                <input type="date" name="ReleaseDate" />
+            </div>
 
         @if (TempData["msg"] != null && ((List<string>)TempData["msg"]!).Any())
         {

@@ -35,17 +35,11 @@ public class MoviesController(IMovieService movieService, ICommentService commen
 
     [HttpPost]
     [Authorize(Policy = "AdminRequirement")]
-    public async Task<ActionResult> Create(CreateMovieDTO model, IFormFile imageFile)
+    public async Task<ActionResult> Create(CreateMovieDTO model)
     {
 
-        ModelState.Remove(nameof(model.ImageData));
-        if (ModelState.IsValid && imageFile != null && imageFile.Length > 0)
+        if (ModelState.IsValid && model.ImageFile.Length > 0)
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                await imageFile.CopyToAsync(memoryStream);
-                model.ImageData = memoryStream.ToArray();
-            }
 
             //TODO: Create the movie
             await movieService.CreateMovieAsync(model);
@@ -74,23 +68,16 @@ public class MoviesController(IMovieService movieService, ICommentService commen
 
     [HttpPost]
     [Authorize(Policy = "AdminRequirement")]
-    public async Task<IActionResult> Update(MovieDetailDTO movie, IFormFile? imageFile)
+    public async Task<IActionResult> Update(UpdateMovieDetailsDTO updatedMovie)
     {
-        if (imageFile != null && imageFile.Length > 0)
-        {
-            using (var memoryStream = new MemoryStream())
-            {
-                await imageFile.CopyToAsync(memoryStream);
-                movie.Image = memoryStream.ToArray();
-            }
-        }
+
         if (ModelState.IsValid)
         {
-            await movieService.Update(movie);
-            return RedirectToAction(nameof(Detail), new { Id = movie.Id });
+            await movieService.Update(updatedMovie);
+
         }
 
-        return View(movie);
+        return RedirectToAction(nameof(Detail), new { Id = updatedMovie.MovieId });
     }
 
     public async Task<IActionResult> Detail(Guid id)
@@ -151,19 +138,19 @@ public class MoviesController(IMovieService movieService, ICommentService commen
             return BadRequest();
         }
 
-        await emailService.ShareMovie(to, movieResult.AsT0);
+        emailService.ShareMovie(to, movieResult.AsT0);
         return RedirectToAction(nameof(Detail), new { Id = movieId });
     }
 
-    [HttpPost]
-    public async Task<IActionResult> AddTrending(string title, string description, DateOnly releaseDate, string imageUrl, int? currentPage = 1)
-    {
-        var image_data = await movieService.FetchImageAsync(imageUrl);
-        var createMovieDTO = new CreateMovieDTO(title, description, releaseDate, image_data);
-        var movie = await movieService.CreateMovieAsync(createMovieDTO);
-        TempData["msg"] = "Movie added succesfully!";
-        return RedirectToAction(nameof(Trending), new { page = currentPage });
-    }
+    //[HttpPost]
+    //public async Task<IActionResult> AddTrending(string title, string description, DateOnly releaseDate, string imageUrl, int? currentPage = 1)
+    //{
+    //    var image_data = await movieService.FetchImageAsync(imageUrl);
+    //    var createMovieDTO = new CreateMovieDTO(title, description, releaseDate, image_data);
+    //    var movie = await movieService.CreateMovieAsync(createMovieDTO);
+    //    TempData["msg"] = "Movie added succesfully!";
+    //    return RedirectToAction(nameof(Trending), new { page = currentPage });
+    //}
 
     [HttpGet]
     public async Task<IActionResult> Search(string searchText)

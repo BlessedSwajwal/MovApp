@@ -83,7 +83,7 @@
                 <td>@movie.Description</td>
                 <td>@movie.Rating</td>
                 <td>@movie.TotalRates</td>
-                <td><img src="data:image;base64,@Convert.ToBase64String(movie.Image)" /></td>
+                <td><img src="@(AppData.ImageUrl+$"/{movie.ImagePath}")" /></td>
                 <td>
                     <a class="button" href="@Url.Action("Detail", "Movies", new { id = movie.Id })">Details</a>
                     <a class="button" href="@Url.Action($"Delete", "Movies", new { id = movie.Id })">Delete</a>
