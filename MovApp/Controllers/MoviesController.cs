@@ -1,6 +1,7 @@
 ﻿using Infrastructure;
 using Infrastructure.DTOs.Movie;
 using Infrastructure.Services.Email;
+using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -110,12 +111,7 @@ public class MoviesController(IMovieService movieService, ICommentService commen
         return RedirectToAction(nameof(Detail), new { id = movieId });
     }
 
-    public async Task<IActionResult> Trending([FromQuery] int page = 1)
-    {
-        ViewBag.currentPage = page;
-        var movies = await movieService.GetTrendingMovies(page);
-        return View(movies);
-    }
+
 
     [HttpPost]
     public async Task<IActionResult> Rate(Guid movieId, string userId, int rating)
@@ -142,16 +138,23 @@ public class MoviesController(IMovieService movieService, ICommentService commen
         emailService.ShareMovie(to, movieResult.AsT0);
         return RedirectToAction(nameof(Detail), new { Id = movieId });
     }
+    public async Task<IActionResult> Trending([FromQuery] int page = 1)
+    {
+        ViewBag.currentPage = page;
+        var movies = await movieService.GetTrendingMovies(page);
+        return View(movies);
+    }
 
-    //[HttpPost]
-    //public async Task<IActionResult> AddTrending(string title, string description, DateOnly releaseDate, string imageUrl, int? currentPage = 1)
-    //{
-    //    var image_data = await movieService.FetchImageAsync(imageUrl);
-    //    var createMovieDTO = new CreateMovieDTO(title, description, releaseDate, image_data);
-    //    var movie = await movieService.CreateMovieAsync(createMovieDTO);
-    //    TempData["msg"] = "Movie added succesfully!";
-    //    return RedirectToAction(nameof(Trending), new { page = currentPage });
-    //}
+    [HttpPost]
+    public async Task<IActionResult> AddTrending(string title, string description, DateOnly releaseDate, string imageUrl, int? currentPage = 1)
+    {
+        var image_data = await movieService.FetchImageAsync(imageUrl);
+        var fileName = await SharedFile.SaveFileAsJpg(image_data);
+
+        var movie = await movieService.CreateMovieWithServerImage(title, description, fileName, releaseDate);
+        TempData["msg"] = "Movie added succesfully!";
+        return RedirectToAction(nameof(Trending), new { page = currentPage });
+    }
 
     [HttpGet]
     public async Task<IActionResult> Search(string searchText)

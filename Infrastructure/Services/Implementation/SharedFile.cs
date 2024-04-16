@@ -32,6 +32,21 @@ public static class SharedFile
         return uniqueFileName;
     }
 
+    public static async Task<string> SaveFileAsJpg(byte[] image_data)
+    {
+        var folderPath = GetSharedFolderPath();
+
+        string uniqueFileName = Guid.NewGuid() + ".jpg";
+        string filePath = Path.Combine(folderPath, uniqueFileName);
+
+        using (FileStream stream = new FileStream(filePath, FileMode.Create))
+        {
+            await stream.WriteAsync(image_data, 0, image_data.Length);
+        }
+
+        return uniqueFileName;
+    }
+
     public static async Task<byte[]> GetFileByte(string fileName)
     {
         var folderPath = GetSharedFolderPath();

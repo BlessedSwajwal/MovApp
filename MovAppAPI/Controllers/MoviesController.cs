@@ -1,5 +1,6 @@
 ﻿using Infrastructure.DTOs.Movie;
 using Infrastructure.Services.Email;
+using Infrastructure.Services.Implementation;
 using Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -98,6 +99,16 @@ public class MoviesController(IMovieService movieService, ICommentService commen
         return Ok(movies);
     }
 
+    [HttpPost("AddTrending")]
+    public async Task<IActionResult> AddTrending([FromForm] AddTrendingDTO movieCreateRequest)
+    {
+        var image_data = await movieService.FetchImageAsync(movieCreateRequest.imageUrl);
+        var fileName = await SharedFile.SaveFileAsJpg(image_data);
+
+        var movie = await movieService.CreateMovieWithServerImage(movieCreateRequest.title, movieCreateRequest.description, fileName, movieCreateRequest.releaseDate);
+        return Ok(movie);
+    }
+
     [HttpGet("Rate")]
     public async Task<IActionResult> Rate([FromQuery] Guid movieId, [FromQuery] int rating)
     {
@@ -151,3 +162,5 @@ public class MoviesController(IMovieService movieService, ICommentService commen
     }
 }
 
+
+public record AddTrendingDTO(string title, string description, DateOnly releaseDate, string imageUrl);

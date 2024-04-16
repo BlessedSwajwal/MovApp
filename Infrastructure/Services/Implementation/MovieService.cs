@@ -29,8 +29,13 @@ public partial class MovieService : IMovieService
     {
         var uniqueFileName = await SharedFile.SaveFile(createMovieDTO.ImageFile);
 
-        var movie = Movie.CreateNew(createMovieDTO.Title, createMovieDTO.Description, uniqueFileName, createMovieDTO.ReleaseDate);
+        var movie = await CreateMovieWithServerImage(createMovieDTO.Title, createMovieDTO.Description, uniqueFileName, createMovieDTO.ReleaseDate);
+        return movie;
+    }
 
+    public async Task<Movie> CreateMovieWithServerImage(string title, string description, string fileName, DateOnly releaseDate)
+    {
+        var movie = Movie.CreateNew(title, description, fileName, releaseDate);
         await _movieRepository.Create(movie);
         return movie;
     }
@@ -81,10 +86,12 @@ public partial class MovieService : IMovieService
             var title = movieRoot.GetProperty("original_title").GetString()!;
             var description = movieRoot.GetProperty("overview").GetString()!;
             var image_url = "https://image.tmdb.org/t/p/original" + movieRoot.GetProperty("backdrop_path").GetString()!;
+            DateOnly releaseDate = DateOnly.Parse(movieRoot.GetProperty("release_date").GetString()!);
+
             //byte[] imageBytes = await _httpClient.GetByteArrayAsync("https://image.tmdb.org/t/p/original" + image_url);
             //TODO: Error handling
 
-            movies.Add(new TrendingMovieDTO(title, description, image_url));
+            movies.Add(new TrendingMovieDTO(title, description, image_url, releaseDate));
 
             Console.WriteLine(movie);
         }
