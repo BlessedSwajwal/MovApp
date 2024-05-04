@@ -1,9 +1,11 @@
 ﻿using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.DTOs.Movie;
+using Infrastructure.Notification;
 using Infrastructure.Persistence.Repositories.Interfaces;
 using Infrastructure.Services.Interfaces;
 using Mapster;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using OneOf;
 using System.Net;
@@ -16,13 +18,15 @@ public partial class MovieService : IMovieService
     private readonly ICommentRepository _commentRepository;
     private readonly HttpClient _httpClient;
     private readonly TmdbSettings _settings;
+    private readonly IHubContext<NotificationHub> _hub;
 
-    public MovieService(IMovieRepository movieRepository, HttpClient httpClient, IOptions<TmdbSettings> settings, ICommentRepository commentRepository)
+    public MovieService(IMovieRepository movieRepository, HttpClient httpClient, IOptions<TmdbSettings> settings, ICommentRepository commentRepository, IHubContext<NotificationHub> hub)
     {
         _movieRepository = movieRepository;
         _httpClient = httpClient;
         _settings = settings.Value;
         _commentRepository = commentRepository;
+        _hub = hub;
     }
 
     public async Task<Movie> CreateMovieAsync(CreateMovieDTO createMovieDTO)
@@ -30,6 +34,7 @@ public partial class MovieService : IMovieService
         var uniqueFileName = await SharedFile.SaveFile(createMovieDTO.ImageFile);
 
         var movie = await CreateMovieWithServerImage(createMovieDTO.Title, createMovieDTO.Description, uniqueFileName, createMovieDTO.ReleaseDate);
+
         return movie;
     }
 
@@ -37,6 +42,8 @@ public partial class MovieService : IMovieService
     {
         var movie = Movie.CreateNew(title, description, fileName, releaseDate);
         await _movieRepository.Create(movie);
+        var movieDetail = movie.Adapt<MovieListDTO>();
+        await _hub.Clients.All.SendAsync("MovieAdded", movieDetail);
         return movie;
     }
 
@@ -64,6 +71,7 @@ public partial class MovieService : IMovieService
     public async Task DeleteMovie(Guid movieId)
     {
         await _movieRepository.DeleteMovie(movieId);
+        await _hub.Clients.All.SendAsync("MovieRemoved", movieId);
     }
 
     public async Task<List<TrendingMovieDTO>> GetTrendingMovies(int page = 1)
