@@ -87,5 +87,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<NotificationHub>("/hub/notifications");
+app.MapHub<CommentUpdateHub>("/hub/comments");
 
 app.Run();
